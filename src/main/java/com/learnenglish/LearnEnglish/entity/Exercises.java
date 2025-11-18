@@ -1,0 +1,46 @@
+package com.learnenglish.LearnEnglish.entity;
+
+import java.util.Set;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "exercises")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Exercises {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private Topics topic;
+    
+    @Column(name = "title")
+    private String title;
+    
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private ExerciseType type;
+    
+    @Column(name = "questions", columnDefinition = "json")
+    private String questions;
+    
+    @Column(name = "duration")
+    private int duration;
+    
+    public enum ExerciseType {
+        FILL,
+        LISTEN_WRITE,
+        MATCH,
+        WRITE
+    }
+    
+    @OneToMany(mappedBy = "exercise")
+    private Set<Exercise_results> ListExerciseResults;
+}
