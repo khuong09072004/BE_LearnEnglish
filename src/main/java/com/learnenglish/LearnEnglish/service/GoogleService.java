@@ -54,7 +54,8 @@ public class GoogleService {
                 "user", Map.of(
                         "id", user.getId(),
                         "email", user.getEmail(),
-                        "name", user.getFullName()
+                        "name", user.getFullName(),
+                        "avatar",user.getAvatar()
                 )
         );
     }
