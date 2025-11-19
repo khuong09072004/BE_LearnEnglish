@@ -1,8 +1,17 @@
 package com.learnenglish.LearnEnglish.service;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.google.api.client.auth.openidconnect.IdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.oauth2.IdToken;
 import com.learnenglish.LearnEnglish.dto.requests.ForgotPasswordRequest;
 import com.learnenglish.LearnEnglish.dto.requests.RegisterRequest;
 import com.learnenglish.LearnEnglish.dto.requests.ResetPasswordRequest;
@@ -12,8 +21,13 @@ import com.learnenglish.LearnEnglish.entity.OtpVerification;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.util.JwtTokenProvider;
+
 import jakarta.transaction.Transactional;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
 
 @Service
 public class AuthService {
@@ -23,7 +37,8 @@ public class AuthService {
     OtpService otpService;
     @Autowired
     PasswordEncoder passwordEncoder;
-
+    @Autowired
+    JwtTokenProvider tokenProvider;
     public User Login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Tài khoản không tồn tại trong hệ thống"));
@@ -115,5 +130,9 @@ public class AuthService {
 
         otpService.sendOtpEmail(user, "FORGOT_PASSWORD");
     }
+
+    //
+   
+
 
 }

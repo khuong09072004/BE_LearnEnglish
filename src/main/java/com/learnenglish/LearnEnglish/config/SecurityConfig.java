@@ -41,9 +41,8 @@ public class SecurityConfig {
                         .requestMatchers(AppConstants.PUBLIC_APIS).permitAll()
                         .requestMatchers(AppConstants.USER_APIS).hasRole("USER")
                         .requestMatchers(AppConstants.ADMIN_APIS).hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2AuthenticationSuccessHandler));
+                        .anyRequest().authenticated());
+                
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

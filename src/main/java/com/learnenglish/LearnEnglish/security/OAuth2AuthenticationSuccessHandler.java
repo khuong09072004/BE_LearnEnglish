@@ -60,11 +60,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String jwtToken = jwtTokenProvider.generateToken(user);
         
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-    
-        Map<String, String> responseBody = Map.of("token", jwtToken);
-        
-        new ObjectMapper().writeValue(response.getWriter(), responseBody);
+       String redirectUrl = "http://127.0.0.1:5500/Nhom3/oauth2-success.html?token=" + jwtToken;
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
