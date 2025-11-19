@@ -10,4 +10,5 @@ public class LoginResponse {
     private String email;
     private String name;
     private String avatar;
+    private Boolean has_selected_level;
 }

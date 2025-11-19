@@ -59,6 +59,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserLevel userLevel = UserLevel.BEGINNER;
 
+    @Column(name = "has_selected_level")
+    private Boolean hasSelectedLevel;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null)
