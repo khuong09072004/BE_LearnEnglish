@@ -27,7 +27,7 @@ public class DataInitializer {
                 testUser.setStatus(User.Status.ACTIVE);
                 testUser.setCreatedAt(LocalDateTime.now());
                 testUser.setUpdatedAt(LocalDateTime.now());
-
+                
                 userRepository.save(testUser);
                 System.out.println("Test user created: " + testEmail + " / 123456");
             } else {

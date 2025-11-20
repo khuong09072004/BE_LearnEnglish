@@ -17,9 +17,10 @@ public class User_level_progress {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Column(name = "level")
-    @Enumerated(EnumType.STRING)
-    private UserLevel level;
+    
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    private Levels level;
     @Column(name = "progress")
     private int progress;
     @Column(name = "is_completed")
@@ -27,7 +28,5 @@ public class User_level_progress {
     @Column(name = "completed_at")
     private LocalDateTime completed_at;
 
-    public enum UserLevel {
-        BEGINNER, A1, A2, B1, B2, C1, C2
-    }
+    
 }

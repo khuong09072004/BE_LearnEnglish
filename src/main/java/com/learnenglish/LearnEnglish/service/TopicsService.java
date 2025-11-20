@@ -23,7 +23,7 @@ public class TopicsService {
     private List<TopicsRespone> mapperTopicRespone(List<Topics> lst) {
         List<TopicsRespone> responses = new ArrayList<>();
         for (Topics item : lst) {
-            TopicsRespone dto = new TopicsRespone(item.getId(), item.getName(), item.getLevel());
+            TopicsRespone dto = new TopicsRespone(item.getId(), item.getName(), item.getLevel().getCode());
             responses.add(dto);
         }
         return responses;
@@ -33,7 +33,7 @@ public class TopicsService {
     {
          User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-        List<Topics> lst=topicsRepository.findByLevel(user.getUserLevel().name());
+        List<Topics> lst=topicsRepository.findByLevel(user.getLevel());
         return mapperTopicRespone(lst);
     }
 }

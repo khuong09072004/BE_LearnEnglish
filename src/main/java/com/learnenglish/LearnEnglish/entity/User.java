@@ -55,9 +55,9 @@ public class User {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
-    @Column(name = "user_level")
-    @Enumerated(EnumType.STRING)
-    private UserLevel userLevel = UserLevel.BEGINNER;
+    @ManyToOne
+    @JoinColumn(name = "level_id", nullable = true)
+    private Levels level;
 
     @Column(name = "has_selected_level")
     private Boolean hasSelectedLevel;
@@ -83,9 +83,7 @@ public class User {
         ACTIVE, LOCKED, PENDING
     }
 
-    public enum UserLevel {
-        BEGINNER, A1, A2, B1, B2, C1, C2
-    }
+    
 
     @OneToMany(mappedBy = "user")
     private Set<User_vocab_progress> ListUserV0caProgess;

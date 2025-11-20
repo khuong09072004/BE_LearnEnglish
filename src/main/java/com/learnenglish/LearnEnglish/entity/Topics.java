@@ -19,8 +19,9 @@ public class Topics {
     @Column(name ="name")
     private String name;
 
-    @Column(name="level")
-    private String level;
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    private Levels level;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

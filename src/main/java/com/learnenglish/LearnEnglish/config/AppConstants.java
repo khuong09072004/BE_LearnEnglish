@@ -6,7 +6,8 @@ public class AppConstants {
 
     public static final String[] USER_APIS = {
         "api/users/**",
-        "/api/vocabularies/**"
+        "/api/vocabularies/**",
+        "/api/grammar/**"
     };
      public static final String[] ADMIN_APIS = {
         "api/admin/**"

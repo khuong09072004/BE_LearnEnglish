@@ -49,7 +49,7 @@ public class VocabulariesService {
         Topics topic = topicsRepository.findById(topicId)
             .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
 
-        if (!topic.getLevel().equals(user.getUserLevel().name())) {
+        if (!topic.getLevel().getCode().equals(user.getLevel().getCode())) {
             throw new AuthorizationException("Topic này không phù hợp với trình độ của bạn");
         }
 

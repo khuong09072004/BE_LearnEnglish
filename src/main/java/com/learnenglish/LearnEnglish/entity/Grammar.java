@@ -23,4 +23,8 @@ public class Grammar {
 
     @Column(name = "source")
     private String source;
+
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    private Levels level;
 }
