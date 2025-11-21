@@ -124,7 +124,7 @@ public class AuthController {
         }
 
         try {
-            Map<String, Object> response = googleService.googleLogin(idToken);
+            Object response = googleService.googleLogin(idToken);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));

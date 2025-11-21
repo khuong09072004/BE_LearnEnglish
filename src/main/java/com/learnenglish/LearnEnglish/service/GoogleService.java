@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.learnenglish.LearnEnglish.dto.responses.LoginResponse;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
@@ -27,7 +28,7 @@ public class GoogleService {
     private String GOOGLE_CLIENT_ID ;
 
     @Transactional
-    public Map<String, Object> googleLogin(String idTokenString) {
+    public LoginResponse  googleLogin(String idTokenString) {
         Map<String, Object> payload = verifyGoogleToken(idTokenString);
 
         String email = (String) payload.get("email");
@@ -47,17 +48,14 @@ public class GoogleService {
                     return userRepository.save(u);
                 });
 
-     
+        boolean hasSelectedLevel = user.getLevel() != null;
         String jwt = jwtTokenProvider.generateToken(user);
-        return Map.of(
-                "token", jwt,
-                "user", Map.of(
-                        "id", user.getId(),
-                        "email", user.getEmail(),
-                        "name", user.getFullName(),
-                        "avatar",user.getAvatar()
-                )
-        );
+        return new LoginResponse(
+            jwt,
+            user.getEmail(),
+            user.getFullName(),
+            user.getAvatar(),
+            hasSelectedLevel);
     }
 
     private Map<String, Object> verifyGoogleToken(String idToken) {
