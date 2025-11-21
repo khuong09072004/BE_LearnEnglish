@@ -58,4 +58,13 @@ public class ConversationsService {
         return mapToRespone(conversations);
     
     }
+
+    public ConverSationRespone getConversationById(String email,Long id)
+    {
+         User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ValidationException("Tài khoản không tồn tại trong hệ thống"));
+         Conversations conversation=conversationsRepository.findById(id)
+         .orElseThrow(()->new ValidationException("Không tìm thấy conversation"));
+         return mapToDto(conversation);
+    }
 }

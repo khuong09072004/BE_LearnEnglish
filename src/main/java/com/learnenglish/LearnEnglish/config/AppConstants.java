@@ -9,6 +9,7 @@ public class AppConstants {
         "/api/vocabularies/**",
         "/api/grammar/**"
         ,"/api/conversations/**"
+        ,"/api/exercies/**"
     };
      public static final String[] ADMIN_APIS = {
         "api/admin/**"

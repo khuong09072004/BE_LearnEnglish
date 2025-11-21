@@ -25,4 +25,11 @@ public class VocabulariesController {
         Object response = vocabulariesService.getVocabularies(authentication.getName(),topicId);
         return ApiResponse.success("Success", response);
     }
+
+    @GetMapping("/{id}")
+    public ApiResponse<?> getVocabById(@PathVariable Long id,Authentication authentication)
+    {
+        Object response = vocabulariesService.getVocabulariesById(id);
+        return ApiResponse.success("Success", response);
+    }
 }

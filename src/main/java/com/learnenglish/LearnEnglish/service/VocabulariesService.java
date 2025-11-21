@@ -56,4 +56,11 @@ public class VocabulariesService {
         List<Vocabularies> lst=vocabulariesRepository.findByTopicId(topicId);
         return maperRespones(lst);
     }
+
+    public VocaBularyRespone getVocabulariesById(Long id)
+    {
+        Vocabularies respone=vocabulariesRepository.findById(id)
+        .orElseThrow(() -> new ValidationException("Vocabulary không tồn tại"));
+        return maptoDTO(respone);
+    }
 }
