@@ -23,7 +23,8 @@ public class Exercises {
     
     @Column(name = "title")
     private String title;
-    
+    @Column(name = "audio_url")
+    private String audioUrl;
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private ExerciseType type;
@@ -36,9 +37,12 @@ public class Exercises {
     
     public enum ExerciseType {
         FILL,
-        LISTEN_WRITE,
         MATCH,
-        WRITE
+        WRITE,
+        LISTEN_WRITE,
+        LISTEN_QA,
+        LISTEN_CHOICE,
+        LISTEN_FILL
     }
     
     @OneToMany(mappedBy = "exercise")

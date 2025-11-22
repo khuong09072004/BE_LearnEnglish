@@ -19,4 +19,10 @@ public interface VocabulariesRepository extends JpaRepository<Vocabularies,Long>
         """)
     List<Vocabularies> findByTopicId(@Param("topicId") Long topicId);
     
+    @Query("""
+            select count(v) 
+            from Vocabularies v
+            WHERE v.topic.id = :topicId
+            """)
+    int countByTopicId(@Param ("topicId") Long topicId);
 } 

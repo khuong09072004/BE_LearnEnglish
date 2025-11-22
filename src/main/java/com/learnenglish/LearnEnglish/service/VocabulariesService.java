@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
+import com.learnenglish.LearnEnglish.entity.User_vocab_progress;
 import com.learnenglish.LearnEnglish.entity.Vocabularies;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.VocabMapper;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.repository.UserVocabProgressRepository;
 import com.learnenglish.LearnEnglish.repository.VocabulariesRepository;
 
 @Service
@@ -24,17 +27,21 @@ public class VocabulariesService {
     UserRepository userRepository;
     @Autowired
     TopicsRepository topicsRepository;
-    private VocaBularyRespone maptoDTO(Vocabularies item)
-    {
-        return new VocaBularyRespone(item.getId(),item.getTopic().getId(),item.getWord(),item.getMeaning(),item.getPhonetic(),item.getDescription(),item.getImage_url());
-    }
+    @Autowired 
+    UserVocabProgressRepository userVocabProgressRepository;
+    @Autowired
+    private VocabMapper vocabMapper;
 
-    private List<VocaBularyRespone> maperRespones(List<Vocabularies> lst)
+    private List<VocaBularyRespone> maperRespones(List<Vocabularies> lst,User user)
     {
         List<VocaBularyRespone> respones=new ArrayList<>();
         for(Vocabularies item : lst)
         {
-            VocaBularyRespone dto=maptoDTO(item);
+            boolean is_learned = userVocabProgressRepository
+                .findByUserIdAndVocabularyId(user.getId(), item.getId())
+                .map(User_vocab_progress::isLearned)
+                .orElse(false);
+            VocaBularyRespone dto=vocabMapper.toDTO(item,is_learned);
             respones.add(dto);
         }
         return respones;
@@ -54,13 +61,19 @@ public class VocabulariesService {
         }
 
         List<Vocabularies> lst=vocabulariesRepository.findByTopicId(topicId);
-        return maperRespones(lst);
+        return maperRespones(lst,user);
     }
 
-    public VocaBularyRespone getVocabulariesById(Long id)
+    public VocaBularyRespone getVocabulariesById(String email,Long id)
     {
-        Vocabularies respone=vocabulariesRepository.findById(id)
+         User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
+        Vocabularies voca=vocabulariesRepository.findById(id)
         .orElseThrow(() -> new ValidationException("Vocabulary không tồn tại"));
-        return maptoDTO(respone);
+        boolean is_learned = userVocabProgressRepository
+                .findByUserIdAndVocabularyId(user.getId(), voca.getId())
+                .map(User_vocab_progress::isLearned)
+                .orElse(false);
+        return vocabMapper.toDTO(voca,is_learned);
     }
 }

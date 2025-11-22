@@ -10,6 +10,7 @@ import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
 import com.learnenglish.LearnEnglish.entity.Grammar;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
 
@@ -19,18 +20,14 @@ public class GrammarService {
     GrammarRepository grammarRepository;
     @Autowired
     UserRepository userRepository;
-
-    private GrammarRespone mapToDTO(Grammar item)
-    {
-        return new GrammarRespone(item.getId(), item.getTitle(), item.getContent(), item.getExample(), item.getSource(), item.getLevel().getCode());
-    }
-
+    @Autowired
+    GrammarMapper grammarMapper;
     private List<GrammarRespone> mapToRespone(List<Grammar> lst)
     {
         List<GrammarRespone> respones=new ArrayList<>();
         for(Grammar item : lst)
         {
-            GrammarRespone dto=mapToDTO(item);
+            GrammarRespone dto=grammarMapper.toDTO(item);
             respones.add(dto);
         }
         return respones;
@@ -54,6 +51,6 @@ public class GrammarService {
             throw new ValidationException("Grammar không thuộc trình độ này");
         }
 
-        return mapToDTO(grammar);
+        return grammarMapper.toDTO(grammar);
     }
 }

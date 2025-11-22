@@ -10,6 +10,7 @@ import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
 
@@ -19,11 +20,12 @@ public class TopicsService {
     UserRepository userRepository;
     @Autowired
     TopicsRepository topicsRepository;
-
+    @Autowired
+    TopicMapper topicMapper;
     private List<TopicsRespone> mapperTopicRespone(List<Topics> lst) {
         List<TopicsRespone> responses = new ArrayList<>();
         for (Topics item : lst) {
-            TopicsRespone dto = new TopicsRespone(item.getId(), item.getName(), item.getLevel().getCode());
+            TopicsRespone dto = topicMapper.toDTO(item);
             responses.add(dto);
         }
         return responses;

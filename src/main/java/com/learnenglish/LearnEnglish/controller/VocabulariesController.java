@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
+import com.learnenglish.LearnEnglish.service.UserVocaProgressService;
 import com.learnenglish.LearnEnglish.service.VocabulariesService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class VocabulariesController {
     @Autowired
     VocabulariesService vocabulariesService;
-
+    @Autowired
+    UserVocaProgressService userVocaProgressService;
    @GetMapping("/topic/{topicId}")
     public ApiResponse<?> getVocabByTopic(@PathVariable Long topicId,Authentication authentication)
     {
@@ -29,7 +32,28 @@ public class VocabulariesController {
     @GetMapping("/{id}")
     public ApiResponse<?> getVocabById(@PathVariable Long id,Authentication authentication)
     {
-        Object response = vocabulariesService.getVocabulariesById(id);
+        Object response = vocabulariesService.getVocabulariesById(authentication.getName(),id);
+        return ApiResponse.success("Success", response);
+    }
+
+    @PostMapping("/{id}/learn")
+    public ApiResponse<?> learnVocaByUser(@PathVariable Long id,Authentication authentication)
+    {
+        Object response = userVocaProgressService.learnVocaByUser(authentication.getName(),id);
+         return ApiResponse.success("Success", response);
+    }
+
+    @PostMapping("/{id}/unlearn")
+    public ApiResponse<?> unlearnVocaByUser(@PathVariable Long id,Authentication authentication)
+    {
+        Object response = userVocaProgressService.unlearnVocaByUser(authentication.getName(),id);
+         return ApiResponse.success("Success", response);
+    }
+
+    @GetMapping("/statistics/{topicId}")
+    public ApiResponse<?> getVocabStatisticsInTopic(@PathVariable Long topicId,Authentication authentication)
+    {
+        Object response = userVocaProgressService.getVocabStatisticsInTopic(authentication.getName(),topicId);
         return ApiResponse.success("Success", response);
     }
 }

@@ -13,5 +13,6 @@ public class ExercisesRespone {
     private String title;
     private String type;
     private String questions;
+    private String audioURL;
     private int duration;
 }

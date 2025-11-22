@@ -23,9 +23,9 @@ public class User_vocab_progress {
     private Vocabularies vocabulary;
 
     @Column(name = "is_learned")
-    private boolean is_learned;
+    private boolean isLearned;
 
     @Column(name = "learned_at")
-    private LocalDateTime learned_at = LocalDateTime.now();
+    private LocalDateTime learnedAt = LocalDateTime.now();
 
 }

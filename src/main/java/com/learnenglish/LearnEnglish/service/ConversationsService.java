@@ -12,6 +12,7 @@ import com.learnenglish.LearnEnglish.entity.Conversations;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
 import com.learnenglish.LearnEnglish.repository.ConversationsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
@@ -26,18 +27,15 @@ public class ConversationsService {
     UserRepository userRepository;
     @Autowired 
     TopicsRepository topicsRepository;
-
-    private ConverSationRespone mapToDto(Conversations item)
-    {
-        return new ConverSationRespone(item.getId(), item.getTopic().getId(), item.getTitle(), item.getContext(), item.getRoles(), item.getScript());
-    }
+    @Autowired
+    ConverSationMapper converSationMapper;
 
     private List<ConverSationRespone> mapToRespone(List<Conversations> lst)
     {
         List<ConverSationRespone> respones=new ArrayList<>();
         for(Conversations item : lst)
         {
-            ConverSationRespone dto=mapToDto(item);
+            ConverSationRespone dto=converSationMapper.toDTO(item);
             respones.add(dto);
         }
         return respones;
@@ -65,6 +63,6 @@ public class ConversationsService {
                 .orElseThrow(() -> new ValidationException("Tài khoản không tồn tại trong hệ thống"));
          Conversations conversation=conversationsRepository.findById(id)
          .orElseThrow(()->new ValidationException("Không tìm thấy conversation"));
-         return mapToDto(conversation);
+         return converSationMapper.toDTO(conversation);
     }
 }

@@ -11,6 +11,7 @@ import com.learnenglish.LearnEnglish.entity.Exercises;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
@@ -23,19 +24,15 @@ public class ExercisesService {
     UserRepository userRepository;
     @Autowired
     TopicsRepository topicsRepository;
-
-
-    private ExercisesRespone mapToDto(Exercises item)
-    {
-        return new ExercisesRespone(item.getId(),item.getTopic().getId(),item.getTitle(),item.getType().name(),item.getQuestions(),item.getDuration());
-    }
+    @Autowired
+    ExerciesMapper exerciesMapper;
 
     private List<ExercisesRespone> mapToRespones(List<Exercises> lst)
     {
         List<ExercisesRespone> respones=new ArrayList<>();
         for(Exercises item : lst)
         {
-            ExercisesRespone dto=mapToDto(item);
+            ExercisesRespone dto=exerciesMapper.toDTO(item);
             respones.add(dto);
         }
         return respones;
@@ -59,6 +56,6 @@ public class ExercisesService {
     {
         Exercises respone=exercisesRepository.findById(id)
         .orElseThrow(() -> new ValidationException("Không tìm thấy Exercises"));
-        return mapToDto(respone);
+        return exerciesMapper.toDTO(respone);
     }
 }

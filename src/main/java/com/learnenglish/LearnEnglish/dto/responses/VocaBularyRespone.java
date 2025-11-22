@@ -12,4 +12,5 @@ public class VocaBularyRespone {
     private String phonetic;
     private String description;
     private String image_url;
+    private boolean islearned;
 }
