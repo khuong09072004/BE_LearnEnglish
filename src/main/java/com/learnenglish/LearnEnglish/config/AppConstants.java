@@ -12,7 +12,8 @@ public class AppConstants {
         ,"/api/exercies/**"
     };
      public static final String[] ADMIN_APIS = {
-        "api/admin/**"
+        "api/admin/**",
+        "/api/vocabularies/admin/**",
     };
     public static final String[] PUBLIC_APIS = {
         "/api/auth/**",
