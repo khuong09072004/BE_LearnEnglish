@@ -27,17 +27,6 @@ public class ExercisesService {
     @Autowired
     ExerciesMapper exerciesMapper;
 
-    private List<ExercisesRespone> mapToRespones(List<Exercises> lst)
-    {
-        List<ExercisesRespone> respones=new ArrayList<>();
-        for(Exercises item : lst)
-        {
-            ExercisesRespone dto=exerciesMapper.toDTO(item);
-            respones.add(dto);
-        }
-        return respones;
-    }
-
     public List<ExercisesRespone> getExercies(String email,Long topicId)
     {
         User user = userRepository.findByEmail(email)
@@ -49,7 +38,7 @@ public class ExercisesService {
             throw new ValidationException("Topic không phù hợp với trình độ của người học");
         }  
         List<Exercises> respones=exercisesRepository.findByTopicId(topicId);
-        return mapToRespones(respones);  
+        return exerciesMapper.toListDTO(respones);  
     }
 
     public ExercisesRespone getExerciesById(Long id)

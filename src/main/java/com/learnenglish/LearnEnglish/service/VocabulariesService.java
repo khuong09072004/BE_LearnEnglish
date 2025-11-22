@@ -38,19 +38,6 @@ public class VocabulariesService {
         @Autowired
         ImgBBService imgBBService;
 
-        private List<VocaBularyRespone> maperRespones(List<Vocabularies> lst, User user) {
-                List<VocaBularyRespone> respones = new ArrayList<>();
-                for (Vocabularies item : lst) {
-                        boolean is_learned = userVocabProgressRepository
-                                        .findByUserIdAndVocabularyId(user.getId(), item.getId())
-                                        .map(User_vocab_progress::isLearned)
-                                        .orElse(false);
-                        VocaBularyRespone dto = vocabMapper.toDTO(item, is_learned);
-                        respones.add(dto);
-                }
-                return respones;
-        }
-
         // get list
         public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 
@@ -65,7 +52,7 @@ public class VocabulariesService {
                 }
 
                 List<Vocabularies> lst = vocabulariesRepository.findByTopicId(topicId);
-                return maperRespones(lst, user);
+                return vocabMapper.toListDTO(lst, user);
         }
 
         // get by id
@@ -83,14 +70,8 @@ public class VocabulariesService {
 
         // create
         @Transactional
-        public VocaBularyRespone createVocabularyByAdmin(String email, VocabularyRequest requests,
+        public VocaBularyRespone createVocabularyByAdmin( VocabularyRequest requests,
                         MultipartFile imageFile) {
-                User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-                if (!user.getRole().name().equals("ADMIN")) {
-                        throw new ValidationException("không được phép truy cập");
-                }
-
                 Topics topic = topicsRepository.findById(requests.getTopicId())
                                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
                 Vocabularies vocab = new Vocabularies();
@@ -111,13 +92,8 @@ public class VocabulariesService {
 
         // update
         @Transactional
-        public VocaBularyRespone updateVocabularyByAdmin(String email, Long vocabId, VocabularyRequest requests,
+        public VocaBularyRespone updateVocabularyByAdmin( Long vocabId, VocabularyRequest requests,
                         MultipartFile imageFile) {
-                User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-                if (!user.getRole().name().equals("ADMIN")) {
-                        throw new ValidationException("không được phép truy cập");
-                }
                 Topics topic = topicsRepository.findById(requests.getTopicId())
                                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
                 Vocabularies vocab = vocabulariesRepository.findById(vocabId)
@@ -136,12 +112,7 @@ public class VocabulariesService {
         }
 
         @Transactional
-        public Object deleteVocabularyByAdmin(String email, Long vocabId) {
-                User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-                if (!user.getRole().name().equals("ADMIN")) {
-                        throw new ValidationException("không được phép truy cập");
-                }
+        public Object deleteVocabularyByAdmin( Long vocabId) {
                 Vocabularies vocab = vocabulariesRepository.findById(vocabId)
                                 .orElseThrow(() -> new ValidationException("Vocabulary không tồn tại"));
                 vocabulariesRepository.delete(vocab);

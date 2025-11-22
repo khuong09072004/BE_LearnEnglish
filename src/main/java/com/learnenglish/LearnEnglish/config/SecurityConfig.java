@@ -40,7 +40,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AppConstants.PUBLIC_APIS).permitAll()
-                        .requestMatchers(AppConstants.USER_APIS).hasRole("USER")
+                        .requestMatchers(AppConstants.USER_APIS).hasAnyRole("USER","ADMIN")
                         .requestMatchers(AppConstants.ADMIN_APIS).hasRole("ADMIN")
                         .anyRequest().authenticated());
                 

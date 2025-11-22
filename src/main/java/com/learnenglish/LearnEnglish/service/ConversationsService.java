@@ -30,17 +30,6 @@ public class ConversationsService {
     @Autowired
     ConverSationMapper converSationMapper;
 
-    private List<ConverSationRespone> mapToRespone(List<Conversations> lst)
-    {
-        List<ConverSationRespone> respones=new ArrayList<>();
-        for(Conversations item : lst)
-        {
-            ConverSationRespone dto=converSationMapper.toDTO(item);
-            respones.add(dto);
-        }
-        return respones;
-    }
-
     public List<ConverSationRespone> getConversations(String email,Long topicId)
     {
         User user = userRepository.findByEmail(email)
@@ -53,7 +42,7 @@ public class ConversationsService {
             throw new ValidationException("Topic không phù hợp với trình độ của người học");
         }
         List<Conversations> conversations=conversationsRepository.findByTopic(topic.getId());
-        return mapToRespone(conversations);
+        return converSationMapper.toListDTO(conversations);
     
     }
 

@@ -22,20 +22,13 @@ public class TopicsService {
     TopicsRepository topicsRepository;
     @Autowired
     TopicMapper topicMapper;
-    private List<TopicsRespone> mapperTopicRespone(List<Topics> lst) {
-        List<TopicsRespone> responses = new ArrayList<>();
-        for (Topics item : lst) {
-            TopicsRespone dto = topicMapper.toDTO(item);
-            responses.add(dto);
-        }
-        return responses;
-    }
+    
 
     public List<TopicsRespone> getTopics (String email)
     {
          User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
         List<Topics> lst=topicsRepository.findByLevel(user.getLevel());
-        return mapperTopicRespone(lst);
+        return topicMapper.toListDTO(lst);
     }
 }
