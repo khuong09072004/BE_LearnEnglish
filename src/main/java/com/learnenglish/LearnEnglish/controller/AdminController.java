@@ -21,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
 import com.learnenglish.LearnEnglish.dto.requests.GrammarRequest;
+import com.learnenglish.LearnEnglish.dto.requests.LevelRequest;
 import com.learnenglish.LearnEnglish.dto.requests.VocabularyRequest;
 import com.learnenglish.LearnEnglish.service.AdminService;
 import com.learnenglish.LearnEnglish.service.GrammarService;
+import com.learnenglish.LearnEnglish.service.LevelsService;
 import com.learnenglish.LearnEnglish.service.VocabulariesService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +39,8 @@ public class AdminController {
     GrammarService grammarService;
     @Autowired
     AdminService adminService;
+    @Autowired
+    LevelsService levelsService;
     //Vocabulary
     @GetMapping("/vocabularies")
     @Operation(summary = "Danh sách từ vựng theo Topic  (Admin)")
@@ -71,7 +75,7 @@ public class AdminController {
     }
 
     @PutMapping(value = "/vocabularies/{vocabId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "sửa từ vựng  (Admin)", description = "Update")
+    @Operation(summary = "Cập nhật từ vựng  (Admin)", description = "Update")
     public ApiResponse<?> updateVocabByAdmin( @PathVariable Long vocabId,
             @RequestParam Long topicId,
             @RequestParam String word,
@@ -117,10 +121,10 @@ public class AdminController {
     }
 
     @PutMapping("/grammar/{id}")
-    @Operation(summary = "sửa ngữ pháp (Admin)")
+    @Operation(summary = "Cập nhật ngữ pháp (Admin)")
     public ApiResponse<?> updateGrammarByAdmin(@PathVariable Long id,@RequestBody GrammarRequest request) {
         Object response = grammarService.updateGrammarByAdmin(id,request);
-        return ApiResponse.success("Sửa ngữ pháp thành công", response);
+        return ApiResponse.success("Cập nhật ngữ pháp thành công", response);
     }
 
     @DeleteMapping("/grammar/{id}")
@@ -130,7 +134,38 @@ public class AdminController {
         return ApiResponse.success("Xóa ngữ pháp thành công", response);
     }
 
-    //conversation
+    //level
+    @GetMapping("/levels/{id}")
+    @Operation(summary = "Chi tiết  level (Admin)")
+    public ApiResponse<?> getLevelById(@PathVariable Long id) {
+            Object response = levelsService.getLevelByid(id);
+            return ApiResponse.success("Chi tiết level", response);
+    }
+
+    @PostMapping("/levels")
+    @Operation(summary = "Thêm  level (Admin)")
+    public ApiResponse<?> creatLevels(@RequestBody LevelRequest request) {
+        Object response = levelsService.createLevel(request);
+        return ApiResponse.success("Tạo level thành công", response);
+    }
+
+    @PutMapping("/levels")
+    @Operation(summary = "Cập nhật  level (Admin)")
+    public ApiResponse<?> updateLevels(@PathVariable Long id,@RequestBody LevelRequest request) {
+        Object response = levelsService.updateLevelByid(id,request);
+        return ApiResponse.success("Cập nhật level thành công", response);
+    }
+
+    @DeleteMapping("/levels")
+    @Operation(summary = "Xóa  level (Admin)")
+    public ApiResponse<?> deleteLevels(@PathVariable Long id) {
+        Object response = levelsService.deleteLevelByid(id);
+        return ApiResponse.success("Xóa level thành công", response);
+    }
+
+    //topic
     
+    //conversation
+
     //exercies
 }
