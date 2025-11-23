@@ -2,11 +2,13 @@ package com.learnenglish.LearnEnglish.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
+import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
 import com.learnenglish.LearnEnglish.entity.Grammar;
 import com.learnenglish.LearnEnglish.entity.Levels;
@@ -17,6 +19,7 @@ import com.learnenglish.LearnEnglish.entity.Vocabularies;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
+import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
@@ -45,7 +48,10 @@ public class AdminService {
     GrammarRepository grammarRepository;
     @Autowired
     LevelsRepository levelsRepository;
-
+    @Autowired
+    TopicsService topicsService;
+    @Autowired
+    TopicMapper topicMapper;
     // get list vocabularies
     public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 
@@ -81,6 +87,22 @@ public class AdminService {
         Grammar grammar = grammarRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy grammar"));
         return grammarMapper.toDTO(grammar);
+    }
+
+    //get list topic
+    public List<TopicsRespone> getTopics (Long levelId)
+    {
+        Levels level=levelsRepository.findById(levelId)
+        .orElseThrow(()-> new ValidationException("Level không tồn tại"));
+        List<Topics> lst=topicsRepository.findByLevel(level);
+        return topicMapper.toListDTO(lst);
+    }
+    //get topic by id
+    public TopicsRespone getTopicsById (Long levelId)
+    {
+        Topics topic=topicsRepository.findById(levelId)
+                .orElseThrow(()->new ValidationException("Topic không tồn tại"));
+        return topicMapper.toDTO(topic);
     }
 
 }

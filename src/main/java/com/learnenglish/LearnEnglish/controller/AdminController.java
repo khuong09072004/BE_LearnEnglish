@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,10 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
 import com.learnenglish.LearnEnglish.dto.requests.GrammarRequest;
 import com.learnenglish.LearnEnglish.dto.requests.LevelRequest;
+import com.learnenglish.LearnEnglish.dto.requests.TopicRequest;
 import com.learnenglish.LearnEnglish.dto.requests.VocabularyRequest;
 import com.learnenglish.LearnEnglish.service.AdminService;
 import com.learnenglish.LearnEnglish.service.GrammarService;
 import com.learnenglish.LearnEnglish.service.LevelsService;
+import com.learnenglish.LearnEnglish.service.TopicsService;
 import com.learnenglish.LearnEnglish.service.VocabulariesService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +44,10 @@ public class AdminController {
     AdminService adminService;
     @Autowired
     LevelsService levelsService;
+    @Autowired
+    TopicsService topicsService;
+
+
     //Vocabulary
     @GetMapping("/vocabularies")
     @Operation(summary = "Danh sách từ vựng theo Topic  (Admin)")
@@ -71,7 +78,7 @@ public class AdminController {
 
         Object response = vocabulariesService.createVocabularyByAdmin(req, imageFile);
 
-        return ApiResponse.success("Tạo từ vựng mới thành công", response);
+        return ApiResponse.success("Thêm mới từ vựng mới thành công", response);
     }
 
     @PutMapping(value = "/vocabularies/{vocabId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -117,7 +124,7 @@ public class AdminController {
     @Operation(summary = "thêm ngữ pháp (Admin)")
     public ApiResponse<?> createGrammarByAdmin(@RequestBody GrammarRequest request) {
         Object response = grammarService.createGrammarByAdmin(request);
-        return ApiResponse.success("Thêm ngữ pháp thành công", response);
+        return ApiResponse.success("Thêm mới ngữ pháp thành công", response);
     }
 
     @PutMapping("/grammar/{id}")
@@ -146,7 +153,7 @@ public class AdminController {
     @Operation(summary = "Thêm  level (Admin)")
     public ApiResponse<?> creatLevels(@RequestBody LevelRequest request) {
         Object response = levelsService.createLevel(request);
-        return ApiResponse.success("Tạo level thành công", response);
+        return ApiResponse.success("Thêm mới level thành công", response);
     }
 
     @PutMapping("/levels")
@@ -164,8 +171,42 @@ public class AdminController {
     }
 
     //topic
-    
-    //conversation
+    @GetMapping("/topics")
+    @Operation(summary = "Danh sách  topic theo level (Admin)")
+    public ApiResponse<?> getTopics(@RequestParam Long LevelId) {
+        Object response = adminService.getTopics(LevelId);
+        return ApiResponse.success("Danh sách toppics theo level", response);
+    }
 
+    @GetMapping("/topics/{id}")
+    @Operation(summary = "Chi tiết topic (Admin)")
+    public ApiResponse<?> getTopicsById(@PathVariable Long id) {
+        Object response = adminService.getTopicsById(id);
+        return ApiResponse.success("Chi tiết toppics ", response);
+    }
+
+    @PostMapping("/topics")
+    @Operation(summary = "Thêm mới topic (Admin)")
+    public ApiResponse<?> creatTopics(@RequestBody TopicRequest request) {
+        Object response = topicsService.createTopics(request);
+        return ApiResponse.success("Thêm topic thành công", response);
+    }
+
+    @PutMapping("/topics/{id}")
+    @Operation(summary = "Cập nhật topic (Admin)")
+    public ApiResponse<?> updateTopics(@PathVariable Long id,@RequestBody TopicRequest request) {
+        Object response = topicsService.updateTopics(id,request);
+        return ApiResponse.success("Cập nhật topic thành công", response);
+    }
+
+    @DeleteMapping("/topics/{id}")
+    @Operation(summary = "Xóa topic (Admin)")
+    public ApiResponse<?> updateTopics(@PathVariable Long id) {
+        Object response = topicsService.deleteTopics(id);
+        return ApiResponse.success("Xóa topic thành công", response);
+    }
+
+    //conversation
+    
     //exercies
 }
