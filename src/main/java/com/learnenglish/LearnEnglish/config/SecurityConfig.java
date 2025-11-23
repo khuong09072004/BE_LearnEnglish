@@ -36,7 +36,7 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // hoặc ALWAYS
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AppConstants.PUBLIC_APIS).permitAll()
