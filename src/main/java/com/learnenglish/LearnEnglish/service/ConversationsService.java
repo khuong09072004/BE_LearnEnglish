@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Retry.Topic;
 import org.springframework.stereotype.Service;
 
+import com.learnenglish.LearnEnglish.dto.requests.ConversationRequest;
 import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
 import com.learnenglish.LearnEnglish.entity.Conversations;
 import com.learnenglish.LearnEnglish.entity.Topics;
@@ -46,12 +47,47 @@ public class ConversationsService {
     
     }
 
-    public ConverSationRespone getConversationById(String email,Long id)
+    public ConverSationRespone getConversationById(Long id)
     {
-         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ValidationException("Tài khoản không tồn tại trong hệ thống"));
          Conversations conversation=conversationsRepository.findById(id)
          .orElseThrow(()->new ValidationException("Không tìm thấy conversation"));
          return converSationMapper.toDTO(conversation);
+    }
+
+    public  ConverSationRespone createConversation(ConversationRequest request)
+    {
+            Topics topic = topicsRepository.findById(request.getTopicId())
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+            Conversations conversation=new Conversations();
+            conversation.setContext(request.getContext());
+            conversation.setTitle(request.getTitle());
+            conversation.setTopic(topic);
+            conversation.setRoles(request.getRoles());
+            conversation.setScript(request.getScript());
+            conversationsRepository.save(conversation);
+            return converSationMapper.toDTO(conversation);
+    }
+
+    public  ConverSationRespone updateConversationById(Long id,ConversationRequest request)
+    {
+            Topics topic = topicsRepository.findById(request.getTopicId())
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+            Conversations conversation=conversationsRepository.findById(id)
+            .orElseThrow(()->new ValidationException("Không tìm thấy conversation"));
+            conversation.setContext(request.getContext());
+            conversation.setTitle(request.getTitle());
+            conversation.setTopic(topic);
+            conversation.setRoles(request.getRoles());
+            conversation.setScript(request.getScript());
+            conversationsRepository.save(conversation);
+            return converSationMapper.toDTO(conversation);
+    }
+
+    public  ConverSationRespone deleteConversationById(Long id)
+    {
+            Conversations conversation=conversationsRepository.findById(id)
+            .orElseThrow(()->new ValidationException("Không tìm thấy conversation"));
+            conversationsRepository.delete(conversation);
+            return converSationMapper.toDTO(conversation);
     }
 }

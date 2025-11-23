@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.learnenglish.LearnEnglish.convert.JsonNodeConverter;
+
 @Entity
 @Table(name = "conversations")
 @Data
@@ -26,11 +29,13 @@ public class Conversations {
     @Column(name = "context")
     private String context;
 
-    @Column(name = "roles")
-    private String roles;
+    @Column(name = "roles",columnDefinition = "json")
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode  roles;
 
-    @Column(name = "script")
-    private String script;
+    @Column(name = "script",columnDefinition = "json")
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode script;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     private Set<Conversation_scores> conversationScores;

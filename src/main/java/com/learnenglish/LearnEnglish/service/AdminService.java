@@ -7,9 +7,11 @@ import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
+import com.learnenglish.LearnEnglish.entity.Conversations;
 import com.learnenglish.LearnEnglish.entity.Grammar;
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
@@ -18,9 +20,11 @@ import com.learnenglish.LearnEnglish.entity.User_vocab_progress;
 import com.learnenglish.LearnEnglish.entity.Vocabularies;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
 import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
+import com.learnenglish.LearnEnglish.repository.ConversationsRepository;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
@@ -52,6 +56,11 @@ public class AdminService {
     TopicsService topicsService;
     @Autowired
     TopicMapper topicMapper;
+
+    @Autowired
+    ConversationsRepository conversationsRepository;
+    @Autowired
+    ConverSationMapper converSationMapper;
     // get list vocabularies
     public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 
@@ -103,6 +112,15 @@ public class AdminService {
         Topics topic=topicsRepository.findById(levelId)
                 .orElseThrow(()->new ValidationException("Topic không tồn tại"));
         return topicMapper.toDTO(topic);
+    }
+
+    //getlist conversation
+    public List<ConverSationRespone> getConversations(Long topicId)
+    {
+        Topics topic = topicsRepository.findById(topicId)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+        List<Conversations> conversations=conversationsRepository.findByTopic(topic.getId());
+        return converSationMapper.toListDTO(conversations);
     }
 
 }

@@ -1,4 +1,6 @@
 package com.learnenglish.LearnEnglish.dto.responses;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.persistence.Column;
 import lombok.*;
 
@@ -10,6 +12,6 @@ public class ConverSationRespone {
     private Long topicId;
     private String title;
     private String context;
-    private String roles;
-    private String script;
+    private JsonNode  roles;
+    private JsonNode  script;
 }

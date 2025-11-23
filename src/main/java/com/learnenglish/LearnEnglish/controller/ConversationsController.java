@@ -25,9 +25,9 @@ public class ConversationsController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<?> getConversationsById(Authentication authentication,@PathVariable Long id)
+    public ApiResponse<?> getConversationsById(@PathVariable Long id)
     {
-        Object respone=conversationsService.getConversationById(authentication.getName(), id);
+        Object respone=conversationsService.getConversationById(id);
         return ApiResponse.success("Chi tiết hội thoại", respone);
     }
 

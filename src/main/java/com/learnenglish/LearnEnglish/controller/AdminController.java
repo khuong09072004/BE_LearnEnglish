@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
+import com.learnenglish.LearnEnglish.dto.requests.ConversationRequest;
 import com.learnenglish.LearnEnglish.dto.requests.GrammarRequest;
 import com.learnenglish.LearnEnglish.dto.requests.LevelRequest;
 import com.learnenglish.LearnEnglish.dto.requests.TopicRequest;
 import com.learnenglish.LearnEnglish.dto.requests.VocabularyRequest;
 import com.learnenglish.LearnEnglish.service.AdminService;
+import com.learnenglish.LearnEnglish.service.ConversationsService;
 import com.learnenglish.LearnEnglish.service.GrammarService;
 import com.learnenglish.LearnEnglish.service.LevelsService;
 import com.learnenglish.LearnEnglish.service.TopicsService;
@@ -46,7 +48,8 @@ public class AdminController {
     LevelsService levelsService;
     @Autowired
     TopicsService topicsService;
-
+    @Autowired
+    ConversationsService conversationsService;
 
     //Vocabulary
     @GetMapping("/vocabularies")
@@ -136,7 +139,7 @@ public class AdminController {
 
     @DeleteMapping("/grammar/{id}")
     @Operation(summary = "xóa ngữ pháp (Admin)")
-    public ApiResponse<?> updateGrammarByAdmin(@PathVariable Long id) {
+    public ApiResponse<?> deleteGrammarByAdmin(@PathVariable Long id) {
         Object response = grammarService.deleteGrammarByAdmin(id);
         return ApiResponse.success("Xóa ngữ pháp thành công", response);
     }
@@ -156,14 +159,14 @@ public class AdminController {
         return ApiResponse.success("Thêm mới level thành công", response);
     }
 
-    @PutMapping("/levels")
+    @PutMapping("/levels/{id}")
     @Operation(summary = "Cập nhật  level (Admin)")
     public ApiResponse<?> updateLevels(@PathVariable Long id,@RequestBody LevelRequest request) {
         Object response = levelsService.updateLevelByid(id,request);
         return ApiResponse.success("Cập nhật level thành công", response);
     }
 
-    @DeleteMapping("/levels")
+    @DeleteMapping("/levels/{id}")
     @Operation(summary = "Xóa  level (Admin)")
     public ApiResponse<?> deleteLevels(@PathVariable Long id) {
         Object response = levelsService.deleteLevelByid(id);
@@ -201,12 +204,51 @@ public class AdminController {
 
     @DeleteMapping("/topics/{id}")
     @Operation(summary = "Xóa topic (Admin)")
-    public ApiResponse<?> updateTopics(@PathVariable Long id) {
+    public ApiResponse<?> deleteTopics(@PathVariable Long id) {
         Object response = topicsService.deleteTopics(id);
         return ApiResponse.success("Xóa topic thành công", response);
     }
 
     //conversation
-    
+    @GetMapping("/conversations")
+    @Operation(summary = "Danh sách conversations theo Topic (Admin)")
+    public ApiResponse<?> getConversations(@RequestParam Long TopicId)
+    {
+        Object respone=adminService.getConversations(TopicId);
+        return ApiResponse.success("Danh sách hội thoại theo topic", respone);
+    }
+
+    @GetMapping("/conversations/{id}")
+    @Operation(summary = "Chi tiết conversations (Admin)")
+    public ApiResponse<?> getConversationsById(@PathVariable Long id)
+    {
+        Object respone=conversationsService.getConversationById(id);
+        return ApiResponse.success("Chi tiết hội thoại", respone);
+    }
+
+    @PostMapping("/conversations")
+    @Operation(summary = "Thêm mới conversations (Admin)")
+    public ApiResponse<?> createConversationsById(@RequestBody ConversationRequest request)
+    {
+        Object respone=conversationsService.createConversation(request);
+        return ApiResponse.success("Thêm mới thành công", respone);
+    }
+
+    @PutMapping("/conversations/{id}")
+    @Operation(summary = "Cập nhật conversations (Admin)")
+    public ApiResponse<?> updateConversationsById(@PathVariable Long id,@RequestBody ConversationRequest request)
+    {
+        Object respone=conversationsService.updateConversationById(id,request);
+        return ApiResponse.success("Cập nhật thành công", respone);
+    }
+
+    @DeleteMapping("/conversations/{id}")
+    @Operation(summary = "Xóa conversations (Admin)")
+    public ApiResponse<?> updateConversationsById(@PathVariable Long id)
+    {
+        Object respone=conversationsService.deleteConversationById(id);
+        return ApiResponse.success("Xóa thành công", respone);
+    }
+
     //exercies
 }

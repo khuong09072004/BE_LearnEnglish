@@ -1,5 +1,6 @@
 package com.learnenglish.LearnEnglish.dto.responses;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.learnenglish.LearnEnglish.entity.Topics;
 
 import lombok.*;
@@ -12,7 +13,7 @@ public class ExercisesRespone {
     private Long topicId;
     private String title;
     private String type;
-    private String questions;
+    private JsonNode questions;
     private String audioURL;
     private int duration;
 }

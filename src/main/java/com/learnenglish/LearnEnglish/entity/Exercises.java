@@ -2,6 +2,9 @@ package com.learnenglish.LearnEnglish.entity;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.learnenglish.LearnEnglish.convert.JsonNodeConverter;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,7 +33,8 @@ public class Exercises {
     private ExerciseType type;
     
     @Column(name = "questions", columnDefinition = "json")
-    private String questions;
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode questions;
     
     @Column(name = "duration")
     private int duration;
