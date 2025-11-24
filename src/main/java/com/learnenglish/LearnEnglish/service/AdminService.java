@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
+import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
 import com.learnenglish.LearnEnglish.entity.Conversations;
+import com.learnenglish.LearnEnglish.entity.Exercises;
 import com.learnenglish.LearnEnglish.entity.Grammar;
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
@@ -21,10 +23,12 @@ import com.learnenglish.LearnEnglish.entity.Vocabularies;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
+import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
 import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
 import com.learnenglish.LearnEnglish.repository.ConversationsRepository;
+import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
@@ -45,8 +49,6 @@ public class AdminService {
     @Autowired
     private VocabMapper vocabMapper;
     @Autowired
-    ImgBBService imgBBService;
-    @Autowired
     GrammarMapper grammarMapper;
     @Autowired
     GrammarRepository grammarRepository;
@@ -61,6 +63,11 @@ public class AdminService {
     ConversationsRepository conversationsRepository;
     @Autowired
     ConverSationMapper converSationMapper;
+
+    @Autowired
+    ExerciesMapper exerciesMapper;
+    @Autowired
+    ExercisesRepository exercisesRepository;
     // get list vocabularies
     public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 
@@ -123,4 +130,13 @@ public class AdminService {
         return converSationMapper.toListDTO(conversations);
     }
 
+    //Exercies
+    public List<ExercisesRespone> getExercies(Long topicId)
+    {
+       
+        Topics topic = topicsRepository.findById(topicId)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+        List<Exercises> respones=exercisesRepository.findByTopic(topic);
+        return exerciesMapper.toListDTO(respones);  
+    }
 }

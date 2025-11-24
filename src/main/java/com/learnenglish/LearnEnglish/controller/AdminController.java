@@ -20,14 +20,18 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
 import com.learnenglish.LearnEnglish.dto.requests.ConversationRequest;
+import com.learnenglish.LearnEnglish.dto.requests.ExercisesRequest;
 import com.learnenglish.LearnEnglish.dto.requests.GrammarRequest;
 import com.learnenglish.LearnEnglish.dto.requests.LevelRequest;
 import com.learnenglish.LearnEnglish.dto.requests.TopicRequest;
 import com.learnenglish.LearnEnglish.dto.requests.VocabularyRequest;
 import com.learnenglish.LearnEnglish.service.AdminService;
 import com.learnenglish.LearnEnglish.service.ConversationsService;
+import com.learnenglish.LearnEnglish.service.ExercisesService;
 import com.learnenglish.LearnEnglish.service.GrammarService;
 import com.learnenglish.LearnEnglish.service.LevelsService;
 import com.learnenglish.LearnEnglish.service.TopicsService;
@@ -50,14 +54,15 @@ public class AdminController {
     TopicsService topicsService;
     @Autowired
     ConversationsService conversationsService;
+    @Autowired
+    ExercisesService exercisesService;
 
-    //Vocabulary
+    // Vocabulary
     @GetMapping("/vocabularies")
     @Operation(summary = "Danh sách từ vựng theo Topic  (Admin)")
-    public ApiResponse<?> getVocabularies(Authentication authentication,@RequestParam Long topicId)
-    {
-         Object response = adminService.getVocabularies(authentication.getName(), topicId);
-         return ApiResponse.success("Danh sách từ vựng theo chủ đề", response);
+    public ApiResponse<?> getVocabularies(Authentication authentication, @RequestParam Long topicId) {
+        Object response = adminService.getVocabularies(authentication.getName(), topicId);
+        return ApiResponse.success("Danh sách từ vựng theo chủ đề", response);
     }
 
     @GetMapping("/vocabularies/{id}")
@@ -86,7 +91,7 @@ public class AdminController {
 
     @PutMapping(value = "/vocabularies/{vocabId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Cập nhật từ vựng  (Admin)", description = "Update")
-    public ApiResponse<?> updateVocabByAdmin( @PathVariable Long vocabId,
+    public ApiResponse<?> updateVocabByAdmin(@PathVariable Long vocabId,
             @RequestParam Long topicId,
             @RequestParam String word,
             @RequestParam String meaning,
@@ -106,20 +111,18 @@ public class AdminController {
         return ApiResponse.success("Xóa từ vựng thành công", response);
     }
 
-    //Grammar
+    // Grammar
     @GetMapping("/grammar")
     @Operation(summary = "Danh sách ngữ pháp (Admin) theo level")
-    public ApiResponse<?> getGrammars(Authentication authentication,@RequestParam Long levelId)
-    {
-         Object response = adminService.getGrammars(authentication.getName(), levelId);
-         return ApiResponse.success("Danh sách từ vựng theo chủ đề", response);
+    public ApiResponse<?> getGrammars(Authentication authentication, @RequestParam Long levelId) {
+        Object response = adminService.getGrammars(authentication.getName(), levelId);
+        return ApiResponse.success("Danh sách từ vựng theo chủ đề", response);
     }
 
     @GetMapping("/grammar/{id}")
     @Operation(summary = "Chi tiết ngữ pháp (Admin) ")
-    public ApiResponse<?> getGrammarById(Authentication authentication,@PathVariable Long id)
-    {
-        Object response=adminService.getGrammarByid(authentication.getName(),id);
+    public ApiResponse<?> getGrammarById(Authentication authentication, @PathVariable Long id) {
+        Object response = adminService.getGrammarByid(authentication.getName(), id);
         return ApiResponse.success("Success", response);
     }
 
@@ -132,8 +135,8 @@ public class AdminController {
 
     @PutMapping("/grammar/{id}")
     @Operation(summary = "Cập nhật ngữ pháp (Admin)")
-    public ApiResponse<?> updateGrammarByAdmin(@PathVariable Long id,@RequestBody GrammarRequest request) {
-        Object response = grammarService.updateGrammarByAdmin(id,request);
+    public ApiResponse<?> updateGrammarByAdmin(@PathVariable Long id, @RequestBody GrammarRequest request) {
+        Object response = grammarService.updateGrammarByAdmin(id, request);
         return ApiResponse.success("Cập nhật ngữ pháp thành công", response);
     }
 
@@ -144,12 +147,12 @@ public class AdminController {
         return ApiResponse.success("Xóa ngữ pháp thành công", response);
     }
 
-    //level
+    // level
     @GetMapping("/levels/{id}")
     @Operation(summary = "Chi tiết  level (Admin)")
     public ApiResponse<?> getLevelById(@PathVariable Long id) {
-            Object response = levelsService.getLevelByid(id);
-            return ApiResponse.success("Chi tiết level", response);
+        Object response = levelsService.getLevelByid(id);
+        return ApiResponse.success("Chi tiết level", response);
     }
 
     @PostMapping("/levels")
@@ -161,8 +164,8 @@ public class AdminController {
 
     @PutMapping("/levels/{id}")
     @Operation(summary = "Cập nhật  level (Admin)")
-    public ApiResponse<?> updateLevels(@PathVariable Long id,@RequestBody LevelRequest request) {
-        Object response = levelsService.updateLevelByid(id,request);
+    public ApiResponse<?> updateLevels(@PathVariable Long id, @RequestBody LevelRequest request) {
+        Object response = levelsService.updateLevelByid(id, request);
         return ApiResponse.success("Cập nhật level thành công", response);
     }
 
@@ -173,7 +176,7 @@ public class AdminController {
         return ApiResponse.success("Xóa level thành công", response);
     }
 
-    //topic
+    // topic
     @GetMapping("/topics")
     @Operation(summary = "Danh sách  topic theo level (Admin)")
     public ApiResponse<?> getTopics(@RequestParam Long LevelId) {
@@ -197,8 +200,8 @@ public class AdminController {
 
     @PutMapping("/topics/{id}")
     @Operation(summary = "Cập nhật topic (Admin)")
-    public ApiResponse<?> updateTopics(@PathVariable Long id,@RequestBody TopicRequest request) {
-        Object response = topicsService.updateTopics(id,request);
+    public ApiResponse<?> updateTopics(@PathVariable Long id, @RequestBody TopicRequest request) {
+        Object response = topicsService.updateTopics(id, request);
         return ApiResponse.success("Cập nhật topic thành công", response);
     }
 
@@ -209,46 +212,107 @@ public class AdminController {
         return ApiResponse.success("Xóa topic thành công", response);
     }
 
-    //conversation
+    // conversation
     @GetMapping("/conversations")
     @Operation(summary = "Danh sách conversations theo Topic (Admin)")
-    public ApiResponse<?> getConversations(@RequestParam Long TopicId)
-    {
-        Object respone=adminService.getConversations(TopicId);
+    public ApiResponse<?> getConversations(@RequestParam Long TopicId) {
+        Object respone = adminService.getConversations(TopicId);
         return ApiResponse.success("Danh sách hội thoại theo topic", respone);
     }
 
     @GetMapping("/conversations/{id}")
     @Operation(summary = "Chi tiết conversations (Admin)")
-    public ApiResponse<?> getConversationsById(@PathVariable Long id)
-    {
-        Object respone=conversationsService.getConversationById(id);
+    public ApiResponse<?> getConversationsById(@PathVariable Long id) {
+        Object respone = conversationsService.getConversationById(id);
         return ApiResponse.success("Chi tiết hội thoại", respone);
     }
 
     @PostMapping("/conversations")
     @Operation(summary = "Thêm mới conversations (Admin)")
-    public ApiResponse<?> createConversationsById(@RequestBody ConversationRequest request)
-    {
-        Object respone=conversationsService.createConversation(request);
+    public ApiResponse<?> createConversationsById(@RequestBody ConversationRequest request) {
+        Object respone = conversationsService.createConversation(request);
         return ApiResponse.success("Thêm mới thành công", respone);
     }
 
     @PutMapping("/conversations/{id}")
     @Operation(summary = "Cập nhật conversations (Admin)")
-    public ApiResponse<?> updateConversationsById(@PathVariable Long id,@RequestBody ConversationRequest request)
-    {
-        Object respone=conversationsService.updateConversationById(id,request);
+    public ApiResponse<?> updateConversationsById(@PathVariable Long id, @RequestBody ConversationRequest request) {
+        Object respone = conversationsService.updateConversationById(id, request);
         return ApiResponse.success("Cập nhật thành công", respone);
     }
 
     @DeleteMapping("/conversations/{id}")
     @Operation(summary = "Xóa conversations (Admin)")
-    public ApiResponse<?> updateConversationsById(@PathVariable Long id)
-    {
-        Object respone=conversationsService.deleteConversationById(id);
+    public ApiResponse<?> updateConversationsById(@PathVariable Long id) {
+        Object respone = conversationsService.deleteConversationById(id);
         return ApiResponse.success("Xóa thành công", respone);
     }
 
-    //exercies
+    // exercies
+    @GetMapping("/exercies")
+    @Operation(summary = "Danh sách exercies theo chủ đề (Admin)")
+    public ApiResponse<?> getExercies(@RequestParam Long TopicId) {
+        Object respone = adminService.getExercies(TopicId);
+        return ApiResponse.success("Danh sách exercies theo chủ đề", respone);
+    }
+
+    @GetMapping("/exercies/{id}")
+    @Operation(summary = "Danh sách exercies theo chủ đề (Admin)")
+    public ApiResponse<?> getExerciesById(@PathVariable Long id) {
+        Object respone = exercisesService.getExerciesById(id);
+        return ApiResponse.success("Chi tiết exercies", respone);
+    }
+
+    @PostMapping(value = "/exercies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Thêm mới exercies (Admin)")
+    public ApiResponse<?> createExercise(
+            @RequestParam("topicId") Long topicId,
+            @RequestParam("title") String title,
+            @RequestParam("type") String type,
+            @RequestParam("questions") String questions,
+            @RequestParam("duration") int duration,
+            @RequestParam(value = "audioFile", required = false) MultipartFile audioFile) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode questionsNode = mapper.readTree(questions);
+        ExercisesRequest req = new ExercisesRequest();
+        req.setTopicId(topicId);
+        req.setTitle(title);
+        req.setType(type);
+        req.setQuestions(questionsNode);
+        req.setDuration(duration);
+        Object respone = exercisesService.createExercise(req, audioFile);
+        return ApiResponse.success("Tạo exercises thành công", respone);
+    }
+
+    @PutMapping(value = "/exercies/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Cập nhật  exercies (Admin)")
+    public ApiResponse<?> updateExercise(@PathVariable Long id,
+            @RequestParam("topicId") Long topicId,
+            @RequestParam("title") String title,
+            @RequestParam("type") String type,
+            @RequestParam("questions") String questions,
+            @RequestParam("duration") int duration,
+            @RequestParam(value = "audioFile", required = false) MultipartFile audioFile) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode questionsNode = mapper.readTree(questions);
+        ExercisesRequest req = new ExercisesRequest();
+        req.setTopicId(topicId);
+        req.setTitle(title);
+        req.setType(type);
+        req.setQuestions(questionsNode);
+        req.setDuration(duration);
+        Object respone = exercisesService.updateExercise(id,req, audioFile);
+        return ApiResponse.success("Cập nhật exercises thành công", respone);
+    }
+
+    @DeleteMapping("/exercies/{id}")
+    @Operation(summary = "Xóa exercies (Admin)")
+    public ApiResponse<?> deleteExerciesById(@PathVariable Long id) {
+        Object respone = exercisesService.deleteExercise(id);
+        return ApiResponse.success("Xóa exercies thành công", respone);
+    }
+
+
 }

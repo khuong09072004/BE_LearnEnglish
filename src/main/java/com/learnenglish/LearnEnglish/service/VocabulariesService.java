@@ -35,8 +35,8 @@ public class VocabulariesService {
         UserVocabProgressRepository userVocabProgressRepository;
         @Autowired
         private VocabMapper vocabMapper;
-        @Autowired
-        ImgBBService imgBBService;
+        @Autowired 
+        CloudinaryService cloudinaryService;
 
         // get list
         public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
@@ -82,9 +82,8 @@ public class VocabulariesService {
                 vocab.setPhonetic(requests.getPhonetic());
                 String imageUrl = null;
                 if (imageFile != null && !imageFile.isEmpty()) {
-                        imageUrl = imgBBService.checkAndUploadImage(imageFile);
+                        imageUrl =cloudinaryService.uploadImage(imageFile);
                 }
-                vocab.setImage_url(imageUrl);
                 vocab.setImage_url(imageUrl);
                 vocabulariesRepository.save(vocab);
                 return vocabMapper.toDTO(vocab, false);
@@ -104,7 +103,7 @@ public class VocabulariesService {
                 vocab.setMeaning(requests.getMeaning());
                 vocab.setPhonetic(requests.getPhonetic());
                 if (imageFile != null && !imageFile.isEmpty()) {
-                        String imageUrl = imgBBService.checkAndUploadImage(imageFile);
+                        String imageUrl = cloudinaryService.uploadImage(imageFile);
                         vocab.setImage_url(imageUrl);
                 }
                 vocabulariesRepository.save(vocab);

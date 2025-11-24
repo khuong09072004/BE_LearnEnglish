@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.learnenglish.LearnEnglish.entity.Exercises;
+import com.learnenglish.LearnEnglish.entity.Topics;
 @Repository
 public interface ExercisesRepository extends JpaRepository<Exercises,Long> {
     @Query("""
@@ -16,5 +17,6 @@ public interface ExercisesRepository extends JpaRepository<Exercises,Long> {
             where E.topic.id=:topicId
             """)
     List<Exercises> findByTopicId(@Param("topicId") Long topicId);
-
+    
+    List<Exercises> findByTopic(Topics topic);
 }
