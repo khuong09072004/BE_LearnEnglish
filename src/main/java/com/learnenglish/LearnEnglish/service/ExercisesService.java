@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.learnenglish.LearnEnglish.dto.enums.ExerciseType;
 import com.learnenglish.LearnEnglish.dto.requests.ExercisesRequest;
 import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.entity.Exercises;
@@ -63,7 +64,7 @@ public class ExercisesService {
   
     @Transactional
     public ExercisesRespone createExercise(ExercisesRequest req, MultipartFile audioFile) {
-        Exercises.ExerciseType typeEnum = parseType(req.getType());
+        ExerciseType typeEnum = parseType(req.getType());
         Exercises exercise = buildExercise(req, typeEnum, audioFile);
         exercisesRepository.save(exercise);
         return exerciesMapper.toDTO(exercise);
@@ -75,7 +76,7 @@ public class ExercisesService {
         Exercises exercise = exercisesRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Exercise không tồn tại"));
 
-        Exercises.ExerciseType typeEnum = parseType(req.getType());
+        ExerciseType typeEnum = parseType(req.getType());
         Topics topic = topicsRepository.findById(req.getTopicId())
                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
         exercise.setTopic(topic);
@@ -83,6 +84,14 @@ public class ExercisesService {
         exercise.setType(typeEnum);
         exercise.setQuestions(req.getQuestions());
         exercise.setDuration(req.getDuration());
+
+        if (req.getCategory() != null) {
+            exercise.setCategory(Exercises.ExerciseCategory.valueOf(req.getCategory().toUpperCase()));
+        }
+
+        if (req.getAnswerKey() != null) {
+            exercise.setAnswerKey(req.getAnswerKey());
+        }
         handleAudioUpload(exercise, typeEnum, audioFile);
         exercisesRepository.save(exercise);
         return exerciesMapper.toDTO(exercise);
@@ -98,15 +107,15 @@ public class ExercisesService {
     }
 
     
-    private Exercises.ExerciseType parseType(String type) {
+    private ExerciseType parseType(String type) {
         try {
-            return Exercises.ExerciseType.valueOf(type.toUpperCase());
+            return ExerciseType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ValidationException("Type không hợp lệ: " + type);
         }
     }
 
-    private Exercises buildExercise(ExercisesRequest req, Exercises.ExerciseType typeEnum, MultipartFile audioFile) {
+    private Exercises buildExercise(ExercisesRequest req, ExerciseType typeEnum, MultipartFile audioFile) {
         Topics topic = topicsRepository.findById(req.getTopicId())
                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
 
@@ -116,12 +125,19 @@ public class ExercisesService {
         exercise.setType(typeEnum);
         exercise.setQuestions(req.getQuestions());
         exercise.setDuration(req.getDuration());
+        
+        if (req.getCategory() != null) {
+            exercise.setCategory(Exercises.ExerciseCategory.valueOf(req.getCategory().toUpperCase()));
+        }
 
+        if (req.getAnswerKey() != null) {
+            exercise.setAnswerKey(req.getAnswerKey());
+        }
         handleAudioUpload(exercise, typeEnum, audioFile);
         return exercise;
     }
 
-    private void handleAudioUpload(Exercises exercise, Exercises.ExerciseType typeEnum, MultipartFile audioFile) {
+    private void handleAudioUpload(Exercises exercise, ExerciseType typeEnum, MultipartFile audioFile) {
         if (isAudioExercise(typeEnum)) {
             if (audioFile == null || audioFile.isEmpty()) {
                 throw new ValidationException("Bài nghe yêu cầu upload audio");
@@ -133,12 +149,12 @@ public class ExercisesService {
         }
     }
 
-    private boolean isAudioExercise(Exercises.ExerciseType type) {
+    private boolean isAudioExercise(ExerciseType type) {
         switch (type) {
-            case LISTEN_WRITE:
-            case LISTEN_QA:
-            case LISTEN_CHOICE:
+            case LISTEN_MCQ:
             case LISTEN_FILL:
+            case LISTEN_QA:
+            case LISTEN_WRITE:
                 return true;
             default:
                 return false;

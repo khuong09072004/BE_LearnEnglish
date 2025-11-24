@@ -10,6 +10,8 @@ public class ExercisesRequest {
     private String title;
     private String type;       
     private JsonNode questions;
+    private JsonNode answerKey; 
     private String audioURL;
     private int duration;
+    private String category;
 }

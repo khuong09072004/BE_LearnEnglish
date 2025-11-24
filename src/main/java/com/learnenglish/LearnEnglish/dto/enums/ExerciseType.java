@@ -1,0 +1,32 @@
+package com.learnenglish.LearnEnglish.dto.enums;
+
+public enum ExerciseType {
+    
+    VOCAB_MATCH,
+    VOCAB_MEANING_CHOICE,
+    VOCAB_PHONETIC,
+    VOCAB_IMAGE,
+    VOCAB_REORDER,
+    VOCAB_PATTERN_FILL,
+
+    GRAMMAR_MCQ,
+    GRAMMAR_SENTENCE_CHOICE,
+    GRAMMAR_FIND_ERROR,
+    GRAMMAR_REORDER,
+    GRAMMAR_REWRITE,
+
+    LISTEN_MCQ,
+    LISTEN_FILL,
+    LISTEN_QA,
+    LISTEN_WRITE,
+
+    READ_MCQ,
+    READ_SUMMARY,
+    READ_QA,
+
+    WRITE_REORDER,
+    WRITE_REWRITE,
+    WRITE_FIX,
+    WRITE_REORDER_GROUP
+
+}

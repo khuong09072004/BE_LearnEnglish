@@ -16,4 +16,5 @@ public class ExercisesRespone {
     private JsonNode questions;
     private String audioURL;
     private int duration;
+    private String category; 
 }

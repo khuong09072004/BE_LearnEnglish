@@ -2,6 +2,9 @@ package com.learnenglish.LearnEnglish.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.learnenglish.LearnEnglish.convert.JsonNodeConverter;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,13 +25,15 @@ public class Exercise_results {
     @ManyToOne
     @JoinColumn(name = "exercise_id")
     private Exercises exercise;
-    
+
     @Column(name = "answers", columnDefinition = "json")
-    private String answers;
-    
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode answers;
+
     @Column(name = "score")
     private int score;
-    
+    @Column(name = "is_correct_count")
+    private int isCorrectCount;
     @Column(name = "completed_at")
-    private LocalDateTime completed_at;
+    private LocalDateTime completedAt;
 }

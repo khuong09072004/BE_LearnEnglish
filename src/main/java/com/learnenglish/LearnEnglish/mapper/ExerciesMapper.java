@@ -10,10 +10,19 @@ import com.learnenglish.LearnEnglish.entity.Exercises;
 
 @Component
 public class ExerciesMapper {
-    public ExercisesRespone toDTO(Exercises item)
-    {
-        return new ExercisesRespone(item.getId(),item.getTopic().getId(),item.getTitle(),item.getType().name(),item.getQuestions(),item.getAudioUrl(),item.getDuration());
+     public ExercisesRespone toDTO(Exercises item) {
+        return new ExercisesRespone(
+            item.getId(),
+            item.getTopic().getId(),
+            item.getTitle(),
+            item.getType().name(),
+            item.getQuestions(),
+            item.getAudioUrl(),
+            item.getDuration(),
+            item.getCategory() != null ? item.getCategory().name() : null 
+        );
     }
+
 
     public List<ExercisesRespone> toListDTO(List<Exercises> lst)
     {
