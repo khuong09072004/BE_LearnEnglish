@@ -20,6 +20,7 @@ import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.entity.User_vocab_progress;
 import com.learnenglish.LearnEnglish.entity.Vocabularies;
+import com.learnenglish.LearnEnglish.entity.imp.TopicSummary;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
@@ -110,14 +111,14 @@ public class AdminService {
     {
         Levels level=levelsRepository.findById(levelId)
         .orElseThrow(()-> new ValidationException("Level không tồn tại"));
-        List<Topics> lst=topicsRepository.findByLevel(level);
+        List<TopicSummary> lst=topicsRepository.findTopicSummariesByLevel(level);
         return topicMapper.toListDTO(lst);
     }
     //get topic by id
     public TopicsRespone getTopicsById (Long levelId)
     {
-        Topics topic=topicsRepository.findById(levelId)
-                .orElseThrow(()->new ValidationException("Topic không tồn tại"));
+        TopicSummary topic=topicsRepository.findTopicSummaryById(levelId);
+               if (topic == null) throw new ValidationException("Topic không tồn tại");
         return topicMapper.toDTO(topic);
     }
 

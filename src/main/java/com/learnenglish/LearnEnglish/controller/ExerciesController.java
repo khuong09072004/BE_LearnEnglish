@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
+import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.service.ExercisesService;
 
 @RestController
@@ -22,6 +23,15 @@ public class ExerciesController {
         Object respone=exercisesService.getExercies(authentication.getName(), TopicId);
         return ApiResponse.success("Lấy danh sách bài tập theo topic", respone);
     }
+
+    @GetMapping("/{topicId}/category")
+    public ApiResponse<?> getExercisesByCategory(Authentication authentication,
+            @PathVariable Long topicId,
+            @RequestParam String category) {
+                 Object respone =exercisesService.getExercisesByTopicAndCategory(authentication.getName(), topicId, category);
+        return ApiResponse.success("Danh sách câu hỏi trong category ", respone);
+    }
+
 
     @GetMapping("{id}")
     public ApiResponse<?> getExerciseById(Authentication authentication,@PathVariable Long id)

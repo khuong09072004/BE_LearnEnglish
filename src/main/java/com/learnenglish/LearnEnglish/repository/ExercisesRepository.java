@@ -19,4 +19,7 @@ public interface ExercisesRepository extends JpaRepository<Exercises,Long> {
     List<Exercises> findByTopicId(@Param("topicId") Long topicId);
     
     List<Exercises> findByTopic(Topics topic);
+    List<Exercises> findByTopicIdAndCategory(Long topicId, Exercises.ExerciseCategory category);
+
+    List<Exercises> findByCategory(Exercises.ExerciseCategory category);
 }

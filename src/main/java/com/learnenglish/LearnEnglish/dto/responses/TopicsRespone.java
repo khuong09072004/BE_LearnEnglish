@@ -8,4 +8,5 @@ public class TopicsRespone {
     private Long id;
     private String name;
     private String level;
+    private int totalVocab;
 }

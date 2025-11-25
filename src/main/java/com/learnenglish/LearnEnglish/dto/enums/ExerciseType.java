@@ -5,7 +5,6 @@ public enum ExerciseType {
     VOCAB_MATCH,
     VOCAB_MEANING_CHOICE,
     VOCAB_PHONETIC,
-    VOCAB_IMAGE,
     VOCAB_REORDER,
     VOCAB_PATTERN_FILL,
 

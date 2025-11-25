@@ -26,7 +26,7 @@ public class Topics {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="topic")
     private Set<Vocabularies> vocabularies;
 
     @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)

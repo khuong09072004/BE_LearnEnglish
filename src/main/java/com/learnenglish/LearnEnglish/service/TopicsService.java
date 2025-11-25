@@ -12,6 +12,7 @@ import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
+import com.learnenglish.LearnEnglish.entity.imp.TopicSummary;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
@@ -33,7 +34,7 @@ public class TopicsService {
     {
          User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-        List<Topics> lst=topicsRepository.findByLevel(user.getLevel());
+        List<TopicSummary> lst=topicsRepository.findTopicSummariesByLevel(user.getLevel());
         return topicMapper.toListDTO(lst);
     }
     //create 
@@ -46,7 +47,8 @@ public class TopicsService {
         topic.setLevel(level);
         topic.setCreatedAt(LocalDateTime.now());
         topicsRepository.save(topic);
-        return topicMapper.toDTO(topic);
+        TopicSummary summary = topicsRepository.findTopicSummaryById(topic.getId());
+        return topicMapper.toDTO(summary);
     }
     //update
     public TopicsRespone updateTopics(Long id,TopicRequest request)
@@ -59,7 +61,8 @@ public class TopicsService {
         topic.setLevel(level);
         topic.setCreatedAt(LocalDateTime.now());
         topicsRepository.save(topic);
-        return topicMapper.toDTO(topic);
+        TopicSummary summary = topicsRepository.findTopicSummaryById(topic.getId());
+        return topicMapper.toDTO(summary);
     }
     //delete
     public TopicsRespone deleteTopics(Long id)
@@ -67,6 +70,7 @@ public class TopicsService {
         Topics topic=topicsRepository.findById(id)
                 .orElseThrow(()->new ValidationException("Topic không tồn tại"));;
         topicsRepository.delete(topic);
-        return topicMapper.toDTO(topic);
+        TopicSummary summary = topicsRepository.findTopicSummaryById(topic.getId());
+        return topicMapper.toDTO(summary);
     }
 }

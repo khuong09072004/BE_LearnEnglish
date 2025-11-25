@@ -160,4 +160,28 @@ public class ExercisesService {
                 return false;
         }
     }
+
+    public List<ExercisesRespone> getExercisesByTopicAndCategory(String email, Long topicId, String categoryStr) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
+
+    Topics topic = topicsRepository.findById(topicId)
+            .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+
+    if (!user.getLevel().getCode().equals(topic.getLevel().getCode())) {
+        throw new ValidationException("Topic không phù hợp với trình độ của người học");
+    }
+
+    // Convert string sang enum
+    Exercises.ExerciseCategory category;
+    try {
+        category = Exercises.ExerciseCategory.valueOf(categoryStr.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        throw new ValidationException("Category không hợp lệ: " + categoryStr);
+    }
+
+    List<Exercises> exercises = exercisesRepository.findByTopicIdAndCategory(topicId, category);
+    return exerciesMapper.toListDTO(exercises);
+}
+
 }

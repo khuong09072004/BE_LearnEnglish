@@ -10,8 +10,27 @@ import org.springframework.stereotype.Repository;
 
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
+import com.learnenglish.LearnEnglish.entity.imp.TopicSummary;
 @Repository
 public interface TopicsRepository extends JpaRepository<Topics,Long> {
-    List<Topics> findByLevel(Levels level);
+      
+    @Query("""
+        SELECT t.id AS id, t.name AS name, t.level.code AS level, COUNT(v) AS totalVocab
+        FROM Topics t
+        LEFT JOIN t.vocabularies v
+        WHERE t.level = :level
+        GROUP BY t.id
+    """)
+    List<TopicSummary> findTopicSummariesByLevel(@Param("level") Levels level);
+
+  
+    @Query("""
+        SELECT t.id AS id, t.name AS name, t.level.code AS level, COUNT(v) AS totalVocab
+        FROM Topics t
+        LEFT JOIN t.vocabularies v
+        WHERE t.id = :id
+        GROUP BY t.id
+    """)
+    TopicSummary findTopicSummaryById(@Param("id") Long id);
    
 }
