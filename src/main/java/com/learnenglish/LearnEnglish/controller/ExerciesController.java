@@ -1,5 +1,7 @@
 package com.learnenglish.LearnEnglish.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,5 +40,13 @@ public class ExerciesController {
     {
         Object respone=exercisesService.getExerciesById(id);
         return ApiResponse.success("Lấy chi tiết bài tập", respone);
+    }
+
+    @GetMapping("/category")
+    public ApiResponse<?> getCategory()
+    {
+        List<String> lst = List.of("VOCAB", "GRAMMAR", "LISTENING", "READING", "WRITING");
+        Object respone=lst;
+        return ApiResponse.success("Danh sách category", respone);
     }
 }

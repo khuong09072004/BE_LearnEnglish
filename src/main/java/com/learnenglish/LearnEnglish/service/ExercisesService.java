@@ -44,7 +44,7 @@ public class ExercisesService {
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
 
         Topics topic = topicsRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics"));
 
         if (!user.getLevel().getCode().equals(topic.getLevel().getCode())) {
             throw new ValidationException("Topic không phù hợp với trình độ của người học");
@@ -54,23 +54,26 @@ public class ExercisesService {
         return exerciesMapper.toListDTO(exercises);
     }
 
-    
+   
     public ExercisesRespone getExerciesById(Long id) {
         Exercises exercise = exercisesRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy Exercises"));
         return exerciesMapper.toDTO(exercise);
     }
 
-  
+   
     @Transactional
     public ExercisesRespone createExercise(ExercisesRequest req, MultipartFile audioFile) {
         ExerciseType typeEnum = parseType(req.getType());
-        Exercises exercise = buildExercise(req, typeEnum, audioFile);
+
+        Exercises exercise = buildExercise(req, typeEnum);
+        handleAudioUpload(exercise, typeEnum, audioFile);
+
         exercisesRepository.save(exercise);
         return exerciesMapper.toDTO(exercise);
     }
 
-
+   
     @Transactional
     public ExercisesRespone updateExercise(Long id, ExercisesRequest req, MultipartFile audioFile) {
         Exercises exercise = exercisesRepository.findById(id)
@@ -79,20 +82,18 @@ public class ExercisesService {
         ExerciseType typeEnum = parseType(req.getType());
         Topics topic = topicsRepository.findById(req.getTopicId())
                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
+
         exercise.setTopic(topic);
         exercise.setTitle(req.getTitle());
         exercise.setType(typeEnum);
-        exercise.setQuestions(req.getQuestions());
         exercise.setDuration(req.getDuration());
 
         if (req.getCategory() != null) {
             exercise.setCategory(Exercises.ExerciseCategory.valueOf(req.getCategory().toUpperCase()));
         }
 
-        if (req.getAnswerKey() != null) {
-            exercise.setAnswerKey(req.getAnswerKey());
-        }
         handleAudioUpload(exercise, typeEnum, audioFile);
+
         exercisesRepository.save(exercise);
         return exerciesMapper.toDTO(exercise);
     }
@@ -102,11 +103,12 @@ public class ExercisesService {
     public ExercisesRespone deleteExercise(Long id) {
         Exercises exercise = exercisesRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Exercise không tồn tại"));
+
         exercisesRepository.delete(exercise);
         return exerciesMapper.toDTO(exercise);
     }
 
-    
+  
     private ExerciseType parseType(String type) {
         try {
             return ExerciseType.valueOf(type.toUpperCase());
@@ -115,35 +117,34 @@ public class ExercisesService {
         }
     }
 
-    private Exercises buildExercise(ExercisesRequest req, ExerciseType typeEnum, MultipartFile audioFile) {
+    private Exercises buildExercise(ExercisesRequest req, ExerciseType typeEnum) {
         Topics topic = topicsRepository.findById(req.getTopicId())
                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
 
         Exercises exercise = new Exercises();
+
         exercise.setTopic(topic);
         exercise.setTitle(req.getTitle());
         exercise.setType(typeEnum);
-        exercise.setQuestions(req.getQuestions());
         exercise.setDuration(req.getDuration());
-        
+
         if (req.getCategory() != null) {
             exercise.setCategory(Exercises.ExerciseCategory.valueOf(req.getCategory().toUpperCase()));
         }
 
-        if (req.getAnswerKey() != null) {
-            exercise.setAnswerKey(req.getAnswerKey());
-        }
-        handleAudioUpload(exercise, typeEnum, audioFile);
         return exercise;
     }
 
     private void handleAudioUpload(Exercises exercise, ExerciseType typeEnum, MultipartFile audioFile) {
         if (isAudioExercise(typeEnum)) {
-            if (audioFile == null || audioFile.isEmpty()) {
+
+            if (audioFile != null && !audioFile.isEmpty()) {
+                String audioUrl = cloudinaryService.uploadAudio(audioFile);
+                exercise.setAudioUrl(audioUrl);
+            } else {
                 throw new ValidationException("Bài nghe yêu cầu upload audio");
             }
-            String audioUrl = cloudinaryService.uploadAudio(audioFile);
-            exercise.setAudioUrl(audioUrl);
+
         } else {
             exercise.setAudioUrl(null);
         }
@@ -161,27 +162,26 @@ public class ExercisesService {
         }
     }
 
+  
     public List<ExercisesRespone> getExercisesByTopicAndCategory(String email, Long topicId, String categoryStr) {
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
 
-    Topics topic = topicsRepository.findById(topicId)
-            .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
+        Topics topic = topicsRepository.findById(topicId)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics"));
 
-    if (!user.getLevel().getCode().equals(topic.getLevel().getCode())) {
-        throw new ValidationException("Topic không phù hợp với trình độ của người học");
+        if (!user.getLevel().getCode().equals(topic.getLevel().getCode())) {
+            throw new ValidationException("Topic không phù hợp với trình độ của người học");
+        }
+
+        Exercises.ExerciseCategory category;
+        try {
+            category = Exercises.ExerciseCategory.valueOf(categoryStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Category không hợp lệ: " + categoryStr);
+        }
+
+        List<Exercises> exercises = exercisesRepository.findByTopicIdAndCategory(topicId, category);
+        return exerciesMapper.toListDTO(exercises);
     }
-
-    // Convert string sang enum
-    Exercises.ExerciseCategory category;
-    try {
-        category = Exercises.ExerciseCategory.valueOf(categoryStr.toUpperCase());
-    } catch (IllegalArgumentException e) {
-        throw new ValidationException("Category không hợp lệ: " + categoryStr);
-    }
-
-    List<Exercises> exercises = exercisesRepository.findByTopicIdAndCategory(topicId, category);
-    return exerciesMapper.toListDTO(exercises);
-}
-
 }

@@ -25,25 +25,22 @@ public class Exercises {
     @JoinColumn(name = "topic_id")
     private Topics topic;
 
-    @Column(name = "title")
     private String title;
+
     @Column(name = "audio_url")
     private String audioUrl;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
     private ExerciseType type;
 
-    @Column(name = "questions", columnDefinition = "json")
-    @Convert(converter = JsonNodeConverter.class)
-    private JsonNode questions;
-    @Column(name = "answer_key", columnDefinition = "json")
-    @Convert(converter = JsonNodeConverter.class)
-    private JsonNode answerKey;
-    @Column(name = "duration")
-    private int duration;
     @Enumerated(EnumType.STRING)
-    @Column(name = "category")
     private ExerciseCategory category;
+
+    private int duration;
+
+    // Quan hệ 1 → N sang exercise_items
+    @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ExerciseItems> exerciseItems;
 
     public enum ExerciseCategory {
         VOCAB, GRAMMAR, LISTENING, READING, WRITING

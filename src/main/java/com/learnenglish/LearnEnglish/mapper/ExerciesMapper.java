@@ -16,7 +16,6 @@ public class ExerciesMapper {
             item.getTopic().getId(),
             item.getTitle(),
             item.getType().name(),
-            item.getQuestions(),
             item.getAudioUrl(),
             item.getDuration(),
             item.getCategory() != null ? item.getCategory().name() : null 

@@ -269,23 +269,17 @@ public class AdminController {
             @RequestParam("topicId") Long topicId,
             @RequestParam("title") String title,
             @RequestParam("type") String type,
-            @RequestParam("questions") String questions,
             @RequestParam("duration") int duration,
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "answerKey", required = false) String answerKey,
             @RequestParam(value = "audioFile", required = false) MultipartFile audioFile) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode questionsNode = mapper.readTree(questions);
-        JsonNode answerKeyNode = mapper.readTree(answerKey);
+
         ExercisesRequest req = new ExercisesRequest();
         req.setTopicId(topicId);
         req.setTitle(title);
         req.setType(type);
-        req.setQuestions(questionsNode);
         req.setDuration(duration);
         req.setCategory(category);           
-        req.setAnswerKey(answerKeyNode); 
         Object respone = exercisesService.createExercise(req, audioFile);
         return ApiResponse.success("Tạo exercises thành công", respone);
     }
@@ -296,23 +290,16 @@ public class AdminController {
             @RequestParam("topicId") Long topicId,
             @RequestParam("title") String title,
             @RequestParam("type") String type,
-            @RequestParam("questions") String questions,
             @RequestParam("duration") int duration,
             @RequestParam(value = "category", required = false) String category,
-@RequestParam(value = "answerKey", required = false) String answerKey,
             @RequestParam(value = "audioFile", required = false) MultipartFile audioFile) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode questionsNode = mapper.readTree(questions);
-        JsonNode answerKeyNode = mapper.readTree(answerKey);
         ExercisesRequest req = new ExercisesRequest();
         req.setTopicId(topicId);
         req.setTitle(title);
         req.setType(type);
-        req.setQuestions(questionsNode);
         req.setDuration(duration);
         req.setCategory(category);           
-        req.setAnswerKey(answerKeyNode); 
         Object respone = exercisesService.updateExercise(id,req, audioFile);
         return ApiResponse.success("Cập nhật exercises thành công", respone);
     }

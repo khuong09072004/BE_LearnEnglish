@@ -1,39 +1,39 @@
 package com.learnenglish.LearnEnglish.entity;
 
-import java.time.LocalDateTime;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.learnenglish.LearnEnglish.convert.JsonNodeConverter;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.*;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "exercise_results")
+@Table(name = "exercise_items")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Exercise_results {
+public class ExerciseItems {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id")
     private Exercises exercise;
 
-    @Column(name = "answers", columnDefinition = "json")
-    @Convert(converter = JsonNodeConverter.class)
-    private JsonNode answers;
+    private int position;
 
-    @Column(name = "score")
-    private int score;
-    @Column(name = "is_correct_count")
-    private int correctCount;
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
+    @Column(name = "question_json", columnDefinition = "json")
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode questionJson;
+
+    @Column(name = "answer_json", columnDefinition = "json")
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode answerJson;
+
 }
+
