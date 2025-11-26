@@ -1,92 +1,92 @@
-// package com.learnenglish.LearnEnglish.service;
+package com.learnenglish.LearnEnglish.service;
 
-// import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-// import com.fasterxml.jackson.databind.JsonNode;
-// import com.learnenglish.LearnEnglish.dto.requests.ExerciseSubmitRequest;
-// import com.learnenglish.LearnEnglish.dto.responses.ExerciseResultResponse;
-// import com.learnenglish.LearnEnglish.entity.Exercise_results;
-// import com.learnenglish.LearnEnglish.entity.Exercises;
-// import com.learnenglish.LearnEnglish.mapper.ExerciesResultMapper;
-// import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
-// import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
-// import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.learnenglish.LearnEnglish.dto.requests.ExerciseSubmitRequest;
+import com.learnenglish.LearnEnglish.dto.responses.ExerciseResultResponse;
+import com.learnenglish.LearnEnglish.entity.Exercise_results;
+import com.learnenglish.LearnEnglish.entity.Exercises;
+import com.learnenglish.LearnEnglish.mapper.ExerciesResultMapper;
+import com.learnenglish.LearnEnglish.repository.ExerciseItemsRepository;
+import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
+import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
+import com.learnenglish.LearnEnglish.repository.UserRepository;
 
-// import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
-// @Service
-// public class ExerciseResultService {
-//     @Autowired
-//     private  ExercisesRepository exercisesRepository;
-//     @Autowired
-//     private  ExerciseResultsRepository resultsRepository;
-//     @Autowired
-//     private  UserRepository userRepository;
+@Service
+public class ExerciseResultService {
+    @Autowired
+    private ExercisesRepository exercisesRepository;
+    @Autowired
+    private ExerciseResultsRepository resultsRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    ExerciseItemsRepository exerciseItemsRepository;
 
-//     @Autowired
-//     ExerciesResultMapper exerciesResultMapper;
-// @Transactional
-//      public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, String email) {
-//         Exercises exercise = exercisesRepository.findById(request.getExerciseId())
-//                 .orElseThrow(() -> new RuntimeException("Exercise not found"));
+    @Autowired
+    ExerciesResultMapper exerciesResultMapper;
 
-//         if (exercise.getCategory() != Exercises.ExerciseCategory.VOCAB) {
-//             throw new RuntimeException("Exercise is not VOCAB category");
-//         }
+    @Transactional
+    public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, String email) {
 
-//         JsonNode userAnswers = request.getAnswers();
-//         JsonNode answerKey = exercise.getAnswerKey().get("answers");
+        Exercises exercise = exercisesRepository.findById(request.getExerciseId())
+                .orElseThrow(() -> new RuntimeException("Exercise không tồn tại"));
 
-//         int correctCount = 0;
-//         int total = answerKey.size();
+        if (exercise.getCategory() != Exercises.ExerciseCategory.VOCAB) {
+            throw new RuntimeException("Không đúng dạng bài");
+        }
 
-//         // Loop chấm bài theo type
-//         switch (exercise.getType()) {
-//             case VOCAB_MATCH:
-//             case VOCAB_MEANING_CHOICE:
-//             case VOCAB_PHONETIC:
-//             case VOCAB_PATTERN_FILL:
-//                 correctCount = gradeSimpleVocab(userAnswers, answerKey);
-//                 break;
-//             default:
-//                 throw new RuntimeException("Unsupported VOCAB type");
-//         }
+        JsonNode userAnswerWrapper = request.getAnswers();
+        if (userAnswerWrapper == null || userAnswerWrapper.get("answers") == null) {
+            throw new RuntimeException("kiểu dữ liệu gửi lên không đúng cấu trúc");
+        }
 
-//         int score = (int) Math.round(((double) correctCount / total) * 100);
+        JsonNode userAnswers = userAnswerWrapper.get("answers");
+        var items = exerciseItemsRepository.findByExercise(exercise);
 
-//         // Lưu kết quả
-//         Exercise_results result = new Exercise_results();
-//         result.setExercise(exercise);
-//         result.setUser(userRepository.findByEmail(email).orElse(null));
-//         result.setAnswers(userAnswers);
-//         result.setCorrectCount(correctCount);
-//         result.setScore(score);
-//         result.setCompletedAt(LocalDateTime.now());
-//         resultsRepository.save(result);
-//         return exerciesResultMapper.toDTO(result);
-//     }
+        int correctCount = 0;
+        int total = items.size();
 
-//     private int gradeSimpleVocab(JsonNode userAnswers, JsonNode answerKey) {
-//     int correct = 0;
+        // CHẤM BÀI
+        for (var item : items) {
 
-//     for (JsonNode correctItem : answerKey) {
-//         long id = correctItem.get("id").asLong();
-//         String correctAns = correctItem.get("answer").asText().trim().toLowerCase();
+            long id = item.getId();
+            String correctAns = item.getAnswerJson()
+                    .get("answer").asText().trim().toLowerCase();
 
-//         for (JsonNode userItem : userAnswers.get("answers")) {
-//             if (userItem.get("id").asLong() == id) {
-//                 String userAns = userItem.get("answer").asText().trim().toLowerCase();
+            // Tìm answer từ user
+            for (JsonNode userItem : userAnswers) {
+                if (userItem.get("id").asLong() == id) {
 
-//                 if (userAns.equals(correctAns)) {
-//                     correct++;
-//                 }
-//             }
-//         }
-//     }
-//     return correct;
-// }
+                    String userAns = userItem.get("answer")
+                            .asText().trim().toLowerCase();
 
-// }
+                    if (userAns.equals(correctAns)) {
+                        correctCount++;
+                    }
+                }
+            }
+        }
+
+        int score = (int) Math.round(((double) correctCount / total) * 100);
+
+        Exercise_results result = new Exercise_results();
+        result.setExercise(exercise);
+        result.setUser(userRepository.findByEmail(email).orElse(null));
+        result.setAnswers(userAnswerWrapper);
+        result.setCorrectCount(correctCount);
+        result.setScore(score);
+        result.setCompletedAt(LocalDateTime.now());
+
+        resultsRepository.save(result);
+
+        return exerciesResultMapper.toDTO(result);
+    }
+
+}
