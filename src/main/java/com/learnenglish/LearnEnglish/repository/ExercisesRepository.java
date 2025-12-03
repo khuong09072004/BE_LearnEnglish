@@ -22,4 +22,31 @@ public interface ExercisesRepository extends JpaRepository<Exercises,Long> {
     List<Exercises> findByTopicIdAndCategory(Long topicId, Exercises.ExerciseCategory category);
 
     List<Exercises> findByCategory(Exercises.ExerciseCategory category);
+  @Query("""
+    SELECT 
+        e.id,
+        e.topic.id,
+        e.title,
+        e.type,
+        e.audioUrl,
+        e.duration,
+        e.category,
+        r.score,
+        CASE WHEN r.id IS NOT NULL THEN true ELSE false END
+    FROM Exercises e
+    LEFT JOIN Exercise_results r 
+        ON r.exercise.id = e.id AND r.user.id = :userId
+    WHERE e.topic.id = :topicId
+""")
+List<Object[]> findWithResultRaw(Long topicId, Long userId);
+
+@Query("""
+    SELECT e.id, e.topic.id, e.title, e.type, e.audioUrl, e.duration, e.category,
+           r.score, CASE WHEN r.id IS NOT NULL THEN true ELSE false END
+    FROM Exercises e
+    LEFT JOIN Exercise_results r ON e.id = r.exercise.id AND r.user.id = :userId
+    WHERE e.topic.id = :topicId AND e.category = :category
+""")
+List<Object[]> findByTopicCategoryRaw(Long topicId, Exercises.ExerciseCategory category, Long userId);
+
 }

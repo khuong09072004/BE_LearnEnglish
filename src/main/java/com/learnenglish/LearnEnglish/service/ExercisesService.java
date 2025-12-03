@@ -14,6 +14,7 @@ import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
+import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
@@ -37,7 +38,8 @@ public class ExercisesService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
-
+    @Autowired
+    private ExerciseResultsRepository resultsRepository;
    
     public List<ExercisesRespone> getExercies(String email, Long topicId) {
         User user = userRepository.findByEmail(email)
@@ -50,8 +52,23 @@ public class ExercisesService {
             throw new ValidationException("Topic không phù hợp với trình độ của người học");
         }
 
-        List<Exercises> exercises = exercisesRepository.findByTopicId(topicId);
-        return exerciesMapper.toListDTO(exercises);
+        List<Object[]> rows = exercisesRepository.findWithResultRaw(topicId, user.getId());
+        return rows.stream().map(r -> {
+        ExercisesRespone dto = new ExercisesRespone(
+            (Long) r[0],               
+            (Long) r[1],                 
+            (String) r[2],              
+            r[3].toString(),              
+            (String) r[4],                  
+            (Integer) r[5],                 
+            r[6] != null ? r[6].toString() : null 
+        );
+
+        dto.setScore(r[7] != null ? (Integer) r[7] : 0);
+        dto.setIsDone(r[8] != null ? (Boolean) r[8] : false);
+
+        return dto;
+    }).toList();
     }
 
    
@@ -181,7 +198,23 @@ public class ExercisesService {
             throw new ValidationException("Category không hợp lệ: " + categoryStr);
         }
 
-        List<Exercises> exercises = exercisesRepository.findByTopicIdAndCategory(topicId, category);
-        return exerciesMapper.toListDTO(exercises);
+        List<Object[]> rows = exercisesRepository.findByTopicCategoryRaw(topicId, category, user.getId());
+
+    return rows.stream().map(r -> {
+        ExercisesRespone dto = new ExercisesRespone(
+                (Long) r[0],
+                (Long) r[1],
+                (String) r[2],
+                r[3].toString(),
+                (String) r[4],
+                (Integer) r[5],
+                r[6] != null ? r[6].toString() : null
+        );
+
+        dto.setScore(r[7] != null ? (Integer) r[7] : 0);
+        dto.setIsDone(r[8] != null ? (Boolean) r[8] : false);
+
+        return dto;
+    }).toList();
     }
 }

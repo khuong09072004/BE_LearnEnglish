@@ -6,7 +6,6 @@ import com.learnenglish.LearnEnglish.entity.Topics;
 import lombok.*;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class ExercisesRespone {
     private Long id;
@@ -15,5 +14,50 @@ public class ExercisesRespone {
     private String type;
     private String audioURL;
     private int duration;
-    private String category; 
+    private String category;
+    private Integer score;
+    private Boolean isDone;
+
+   
+    public ExercisesRespone(
+        Long id,
+        Long topicId,
+        String title,
+        String type,
+        String audioURL,
+        int duration,
+        String category
+    ) {
+        this.id = id;
+        this.topicId = topicId;
+        this.title = title;
+        this.type = type;
+        this.audioURL = audioURL;
+        this.duration = duration;
+        this.category = category;
+    }
+
+   
+    public ExercisesRespone(
+        Long id,
+        Long topicId,
+        String title,
+        String type,
+        String audioURL,
+        int duration,
+        String category,
+        Integer score,
+        Boolean isDone
+    ) {
+        this.id = id;
+        this.topicId = topicId;
+        this.title = title;
+        this.type = type;
+        this.audioURL = audioURL;
+        this.duration = duration;
+        this.category = category;
+        this.score = score;
+        this.isDone = isDone;
+    }
 }
+
