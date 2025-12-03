@@ -1,6 +1,8 @@
 package com.learnenglish.LearnEnglish.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -56,13 +58,19 @@ public class ExerciseItemsService {
     }
 
    
-    public List<ExerciseItemResponse> getByExercise(Long exerciseId, String userEmail) {
+    public Object getByExercise(Long exerciseId, String userEmail) {
         boolean includeAnswer = isAdmin(userEmail);
-
-        return itemsRepo.findByExerciseIdOrderByPosition(exerciseId)
+        Exercises exercises=exercisesRepo.findById(exerciseId).orElseThrow(()->new ValidationException("Không tìm thấy bài tập"));
+        List<ExerciseItemResponse> lst=itemsRepo.findByExerciseIdOrderByPosition(exerciseId)
                 .stream()
                 .map(i -> mapper.toDTO(i, includeAnswer))
                 .collect(Collectors.toList());
+        Map<String,Object> respones= new HashMap<>();;
+        respones.put("type", exercises.getType());
+        respones.put("title", exercises.getTitle());
+        respones.put("duration",exercises.getDuration());
+        respones.put("ExerciesItem",lst);
+        return respones;
     }
 
 

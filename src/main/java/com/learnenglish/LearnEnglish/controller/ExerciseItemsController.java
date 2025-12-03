@@ -39,11 +39,11 @@ public class ExerciseItemsController {
 
 
     @GetMapping("/exercise/{exerciseId}")
-    public ApiResponse<List<ExerciseItemResponse>> getByExercise(
+    public ApiResponse<?> getByExercise(
             @PathVariable Long exerciseId,
             Authentication authentication
     ) {
-        List<ExerciseItemResponse> items = service.getByExercise(exerciseId, authentication.getName());
+        Object items = service.getByExercise(exerciseId, authentication.getName());
         return ApiResponse.success("Lấy danh sách câu hỏi thành công", items);
     }
 
