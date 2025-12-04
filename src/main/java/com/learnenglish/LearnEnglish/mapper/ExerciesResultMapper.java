@@ -20,14 +20,14 @@ import com.learnenglish.LearnEnglish.repository.ExerciseItemsRepository;
 public class ExerciesResultMapper {
     @Autowired
     ExerciseItemsRepository  exerciseItemsRepository;
-    public ExerciseResultResponse toDTO(Exercise_results result,int score) {
+    public ExerciseResultResponse toDTO(Exercise_results result,int score,int correctCount) {
         ExerciseResultResponse response = new ExerciseResultResponse();
 
         response.setResultId(result.getId());
         response.setExerciseId(result.getExercise().getId());
         response.setExerciseTitle(result.getExercise().getTitle());
         response.setScore(score);
-        response.setCorrectCount(result.getCorrectCount());
+        response.setCorrectCount(correctCount);
         response.setCompletedAt(result.getCompletedAt());
 
         ArrayNode answersArray = JsonNodeFactory.instance.arrayNode();
