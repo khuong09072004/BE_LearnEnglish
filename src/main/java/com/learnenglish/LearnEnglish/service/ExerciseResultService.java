@@ -76,7 +76,7 @@ public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, 
     );
 
     Exercise_results result;
-
+    
     if (oldResultOpt.isEmpty()) {
        
         result = new Exercise_results();
@@ -90,16 +90,15 @@ public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, 
         resultsRepository.save(result);
 
     } else {
+          result = oldResultOpt.get();
      
-        result = oldResultOpt.get();
+        result.setAnswers(userAnswerWrapper);
+        result.setCorrectCount(correctCount);
 
+        // chỉ update score nếu tốt hơn
         if (score > result.getScore()) {
-            result.setAnswers(userAnswerWrapper);
-            result.setCorrectCount(correctCount);
             result.setScore(score);
             result.setCompletedAt(LocalDateTime.now());
-
-            resultsRepository.save(result);
         }
       
     }
