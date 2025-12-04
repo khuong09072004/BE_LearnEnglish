@@ -33,52 +33,55 @@ public class ExerciseResultService {
     ExerciesResultMapper exerciesResultMapper;
 
     @Transactional
-    public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, String email) {
+public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, String email) {
 
-        Exercises exercise = exercisesRepository.findById(request.getExerciseId())
-                .orElseThrow(() -> new RuntimeException("Exercise không tồn tại"));
+    Exercises exercise = exercisesRepository.findById(request.getExerciseId())
+            .orElseThrow(() -> new RuntimeException("Exercise không tồn tại"));
 
-        if (exercise.getCategory() != Exercises.ExerciseCategory.VOCAB) {
-            throw new RuntimeException("Không đúng dạng bài");
-        }
+    if (exercise.getCategory() != Exercises.ExerciseCategory.VOCAB) {
+        throw new RuntimeException("Không đúng dạng bài");
+    }
 
-        JsonNode userAnswerWrapper = request.getAnswers();
-        if (userAnswerWrapper == null || userAnswerWrapper.get("answers") == null) {
-            throw new RuntimeException("kiểu dữ liệu gửi lên không đúng cấu trúc");
-        }
+    var user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        JsonNode userAnswers = userAnswerWrapper.get("answers");
-        var items = exerciseItemsRepository.findByExercise(exercise);
+    JsonNode userAnswerWrapper = request.getAnswers();
+    if (userAnswerWrapper == null || userAnswerWrapper.get("answers") == null) {
+        throw new RuntimeException("kiểu dữ liệu gửi lên không đúng cấu trúc");
+    }
 
-        int correctCount = 0;
-        int total = items.size();
+    JsonNode userAnswers = userAnswerWrapper.get("answers");
+    var items = exerciseItemsRepository.findByExercise(exercise);
 
-        // CHẤM BÀI
-        for (var item : items) {
+    int correctCount = 0;
+    int total = items.size();
 
-            long id = item.getId();
-            String correctAns = item.getAnswerJson()
-                    .get("answer").asText().trim().toLowerCase();
+    // CHẤM BÀI
+    for (var item : items) {
+        long id = item.getId();
+        String correctAns = item.getAnswerJson()
+                .get("answer").asText().trim().toLowerCase();
 
-            // Tìm answer từ user
-            for (JsonNode userItem : userAnswers) {
-                if (userItem.get("id").asLong() == id) {
-
-                    String userAns = userItem.get("answer")
-                            .asText().trim().toLowerCase();
-
-                    if (userAns.equals(correctAns)) {
-                        correctCount++;
-                    }
-                }
+        for (JsonNode userItem : userAnswers) {
+            if (userItem.get("id").asLong() == id) {
+                String userAns = userItem.get("answer").asText().trim().toLowerCase();
+                if (userAns.equals(correctAns)) correctCount++;
             }
         }
+    }
 
-        int score = (int) Math.round(((double) correctCount / total) * 100);
+    int score = (int) Math.round(((double) correctCount / total) * 100);
+    var oldResultOpt = resultsRepository.findByExerciseIdAndUserId(
+            exercise.getId(), user.getId()
+    );
 
-        Exercise_results result = new Exercise_results();
+    Exercise_results result;
+
+    if (oldResultOpt.isEmpty()) {
+       
+        result = new Exercise_results();
         result.setExercise(exercise);
-        result.setUser(userRepository.findByEmail(email).orElse(null));
+        result.setUser(user);
         result.setAnswers(userAnswerWrapper);
         result.setCorrectCount(correctCount);
         result.setScore(score);
@@ -86,7 +89,23 @@ public class ExerciseResultService {
 
         resultsRepository.save(result);
 
-        return exerciesResultMapper.toDTO(result);
+    } else {
+     
+        result = oldResultOpt.get();
+
+        if (score > result.getScore()) {
+            result.setAnswers(userAnswerWrapper);
+            result.setCorrectCount(correctCount);
+            result.setScore(score);
+            result.setCompletedAt(LocalDateTime.now());
+
+            resultsRepository.save(result);
+        }
+      
     }
+
+    return exerciesResultMapper.toDTO(result);
+}
+
 
 }
