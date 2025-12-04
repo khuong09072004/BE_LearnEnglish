@@ -104,7 +104,7 @@ public ExerciseResultResponse gradeVocabExercise(ExerciseSubmitRequest request, 
       
     }
 
-    return exerciesResultMapper.toDTO(result);
+    return exerciesResultMapper.toDTO(result,score);
 }
 
 

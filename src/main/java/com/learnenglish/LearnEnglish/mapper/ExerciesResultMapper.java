@@ -20,13 +20,13 @@ import com.learnenglish.LearnEnglish.repository.ExerciseItemsRepository;
 public class ExerciesResultMapper {
     @Autowired
     ExerciseItemsRepository  exerciseItemsRepository;
-    public ExerciseResultResponse toDTO(Exercise_results result) {
+    public ExerciseResultResponse toDTO(Exercise_results result,int score) {
         ExerciseResultResponse response = new ExerciseResultResponse();
 
         response.setResultId(result.getId());
         response.setExerciseId(result.getExercise().getId());
         response.setExerciseTitle(result.getExercise().getTitle());
-        response.setScore(result.getScore());
+        response.setScore(score);
         response.setCorrectCount(result.getCorrectCount());
         response.setCompletedAt(result.getCompletedAt());
 
