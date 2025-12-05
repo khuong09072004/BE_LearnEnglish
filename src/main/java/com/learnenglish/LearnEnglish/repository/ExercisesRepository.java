@@ -32,7 +32,8 @@ public interface ExercisesRepository extends JpaRepository<Exercises,Long> {
         e.duration,
         e.category,
         r.score,
-        CASE WHEN r.id IS NOT NULL THEN true ELSE false END
+        CASE WHEN r.id IS NOT NULL THEN true ELSE false END,
+        e.passingId
     FROM Exercises e
     LEFT JOIN Exercise_results r 
         ON r.exercise.id = e.id AND r.user.id = :userId
@@ -42,7 +43,7 @@ List<Object[]> findWithResultRaw(Long topicId, Long userId);
 
 @Query("""
     SELECT e.id, e.topic.id, e.title, e.type, e.audioUrl, e.duration, e.category,
-           r.score, CASE WHEN r.id IS NOT NULL THEN true ELSE false END
+           r.score, CASE WHEN r.id IS NOT NULL THEN true ELSE false END,e.passingId
     FROM Exercises e
     LEFT JOIN Exercise_results r ON e.id = r.exercise.id AND r.user.id = :userId
     WHERE e.topic.id = :topicId AND e.category = :category

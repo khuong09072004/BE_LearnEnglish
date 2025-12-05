@@ -35,9 +35,10 @@ public class Exercises {
 
     @Enumerated(EnumType.STRING)
     private ExerciseCategory category;
-
+    @Column(name = "duration")
     private int duration;
-
+    @Column(name = "passing_id")
+    private int passingId;
     // Quan hệ 1 → N sang exercise_items
     @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ExerciseItems> exerciseItems;

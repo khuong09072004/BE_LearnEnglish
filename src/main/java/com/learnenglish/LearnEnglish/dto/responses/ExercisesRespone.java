@@ -17,7 +17,7 @@ public class ExercisesRespone {
     private String category;
     private Integer score;
     private Boolean isDone;
-
+    private Integer PassedId;
    
     public ExercisesRespone(
         Long id,
@@ -47,7 +47,8 @@ public class ExercisesRespone {
         int duration,
         String category,
         Integer score,
-        Boolean isDone
+        Boolean isDone,
+        Integer PassedId
     ) {
         this.id = id;
         this.topicId = topicId;
@@ -58,6 +59,7 @@ public class ExercisesRespone {
         this.category = category;
         this.score = score;
         this.isDone = isDone;
+        this.PassedId = PassedId;
     }
 }
 

@@ -66,7 +66,7 @@ public class ExercisesService {
 
         dto.setScore(r[7] != null ? (Integer) r[7] : 0);
         dto.setIsDone(r[8] != null ? (Boolean) r[8] : false);
-
+        dto.setPassedId(r[9] == null ? null : ((Number) r[9]).intValue());
         return dto;
     }).toList();
     }
@@ -213,7 +213,7 @@ public class ExercisesService {
 
         dto.setScore(r[7] != null ? (Integer) r[7] : 0);
         dto.setIsDone(r[8] != null ? (Boolean) r[8] : false);
-
+        dto.setPassedId(r[9] != null ? (Integer) r[9] : null);
         return dto;
     }).toList();
     }
