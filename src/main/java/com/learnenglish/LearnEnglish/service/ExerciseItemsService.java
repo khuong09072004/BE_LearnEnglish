@@ -69,6 +69,7 @@ public class ExerciseItemsService {
         respones.put("type", exercises.getType());
         respones.put("title", exercises.getTitle());
         respones.put("duration",exercises.getDuration());
+        respones.put("audioUrl", exercises.getAudioUrl());
         respones.put("ExerciesItem",lst);
         return respones;
     }
