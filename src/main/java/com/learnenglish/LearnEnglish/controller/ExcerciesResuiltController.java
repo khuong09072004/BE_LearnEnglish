@@ -21,9 +21,16 @@ public class ExcerciesResuiltController {
     @Autowired
     ExerciseResultService exerciseResultService;
     @PostMapping("/vocab")
-    public ApiResponse<?> getExercises(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
+    public ApiResponse<?> submitExercisesVocabulary(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
     {
         Object respone=exerciseResultService.gradeVocabExercise(request,authentication.getName());
+        return ApiResponse.success("Kết quả bài tập", respone);
+    }
+
+    @PostMapping("/grammar")
+    public ApiResponse<?> submitExercisesGammar(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
+    {
+        Object respone=exerciseResultService.gradeGrammarExercise(request,authentication.getName());
         return ApiResponse.success("Kết quả bài tập", respone);
     }
 }
