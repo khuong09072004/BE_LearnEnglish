@@ -33,4 +33,11 @@ public class ExcerciesResuiltController {
         Object respone=exerciseResultService.gradeGrammarExercise(request,authentication.getName());
         return ApiResponse.success("Kết quả bài tập", respone);
     }
+
+    @PostMapping("/listening")
+    public ApiResponse<?> submitExercisesListening(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
+    {
+        Object respone=exerciseResultService.gradeListeningExercise(request,authentication.getName());
+        return ApiResponse.success("Kết quả bài tập", respone);
+    }
 }

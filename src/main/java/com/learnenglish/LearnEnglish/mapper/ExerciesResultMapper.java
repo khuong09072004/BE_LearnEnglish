@@ -1,8 +1,7 @@
 package com.learnenglish.LearnEnglish.mapper;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,10 +17,18 @@ import com.learnenglish.LearnEnglish.repository.ExerciseItemsRepository;
 
 @Component
 public class ExerciesResultMapper {
+
     @Autowired
-    ExerciseItemsRepository  exerciseItemsRepository;
-    public ExerciseResultResponse toDTO(Exercise_results result,int score,int correctCount) {
+    private ExerciseItemsRepository exerciseItemsRepository;
+
+    public ExerciseResultResponse toDTO(
+            Exercise_results result,
+            int score,
+            int correctCount
+    ) {
+
         ExerciseResultResponse response = new ExerciseResultResponse();
+
 
         response.setResultId(result.getId());
         response.setExerciseId(result.getExercise().getId());
@@ -31,28 +38,58 @@ public class ExerciesResultMapper {
         response.setCompletedAt(result.getCompletedAt());
 
         ArrayNode answersArray = JsonNodeFactory.instance.arrayNode();
+        JsonNode userAnswersWrapper = result.getAnswers();
+        JsonNode userAnswers = userAnswersWrapper.get("answers");
 
-        JsonNode userAnswers = result.getAnswers().get("answers");
-        List<ExerciseItems> items =exerciseItemsRepository.findByExercise(result.getExercise()) ;
+        List<ExerciseItems> items =
+                exerciseItemsRepository.findByExercise(result.getExercise());
 
         for (ExerciseItems item : items) {
+
             long id = item.getId();
-            String correctAns = item.getAnswerJson().get("answer").asText();
+            List<String> correctAnswers = new ArrayList<>();
+            JsonNode answerJson = item.getAnswerJson();
+
+            if (answerJson != null) {
+                if (answerJson.has("answers") && answerJson.get("answers").isArray()) {
+                    for (JsonNode node : answerJson.get("answers")) {
+                        correctAnswers.add(node.asText());
+                    }
+                }
+
+                else if (answerJson.has("answer")) {
+                    correctAnswers.add(answerJson.get("answer").asText());
+                }
+            }
 
             String userAns = "";
             boolean isCorrect = false;
 
-            for (JsonNode userItem : userAnswers) {
-                if (userItem.get("id").asLong() == id) {
-                    userAns = userItem.get("answer").asText();
-                    isCorrect = userAns.trim().equalsIgnoreCase(correctAns.trim());
+            if (userAnswers != null && userAnswers.isArray()) {
+                for (JsonNode userItem : userAnswers) {
+                    if (userItem.get("id").asLong() == id) {
+                        userAns = userItem.get("answer").asText().trim();
+
+                       for (String correct : correctAnswers) {
+                            if (correct.equalsIgnoreCase(userAns)) {
+                                isCorrect = true;
+                                break;
+                            }
+                        }
+
+                        break;
+                    }
                 }
             }
 
             ObjectNode ansNode = JsonNodeFactory.instance.objectNode();
             ansNode.put("id", id);
             ansNode.put("answer-you", userAns);
-            ansNode.put("answer-correct", correctAns);
+
+            ArrayNode correctArr = JsonNodeFactory.instance.arrayNode();
+            correctAnswers.forEach(correctArr::add);
+            ansNode.set("answer-correct", correctArr);
+
             ansNode.put("isCorrect", isCorrect);
 
             answersArray.add(ansNode);
@@ -62,4 +99,3 @@ public class ExerciesResultMapper {
         return response;
     }
 }
-
