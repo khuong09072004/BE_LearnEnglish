@@ -41,10 +41,17 @@ public class ExcerciesResuiltController {
         return ApiResponse.success("Kết quả bài tập", respone);
     }
 
-     @PostMapping("/reading")
+    @PostMapping("/reading")
     public ApiResponse<?> submitExercisesReading(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
     {
         Object respone=exerciseResultService.gradeReadingExercise(request,authentication.getName());
+        return ApiResponse.success("Kết quả bài tập", respone);
+    }
+
+    @PostMapping("/writing")
+    public ApiResponse<?> submitExercisesWriting(Authentication authentication,@RequestBody ExerciseSubmitRequest request)
+    {
+        Object respone=exerciseResultService.gradeWritingExercise(request,authentication.getName());
         return ApiResponse.success("Kết quả bài tập", respone);
     }
 }

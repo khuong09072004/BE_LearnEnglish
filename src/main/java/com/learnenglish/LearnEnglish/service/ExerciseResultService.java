@@ -65,6 +65,12 @@ public class ExerciseResultService {
                 request, email, Exercises.ExerciseCategory.READING);
     }
 
+    public ExerciseResultResponse gradeWritingExercise(ExerciseSubmitRequest request, String email) {
+        return gradeSingleAnswerExercise(
+                request, email, Exercises.ExerciseCategory.WRITING);
+    }
+
+
     private ExerciseResultResponse gradeSingleAnswerExercise(
             ExerciseSubmitRequest request,
             String email,
@@ -241,4 +247,6 @@ public class ExerciseResultService {
             return 0;
         return (int) Math.round((double) correct / total * 100);
     }
+
+    
 }
