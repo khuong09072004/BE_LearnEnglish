@@ -17,6 +17,8 @@ import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.service.TopicsService;
 import com.learnenglish.LearnEnglish.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 
@@ -32,13 +34,15 @@ public class UserController {
     TopicsService topicsService;
 
     @PutMapping("/level")
+    @Operation(summary = "Chọn trình độ cho user khi mới đăng ký")
     public ApiResponse<?>  selectLevel(@RequestBody SelectLevelRequest request,Authentication authentication)
     {
-        userService.SelectLevel(request.getLevel(),authentication.getName());
+        userService.selectLevel(request.getLevel(),authentication.getName());
         return ApiResponse.success("Chọn trình độ thành công", null);
     }
 
     @GetMapping("/Topics")
+    @Operation(summary = "Lấy danh sách chủ đề theo level của user")
     public ApiResponse<?> getTopics(Authentication authentication)
     {
         List<TopicsRespone> lstTopics= topicsService.getTopics(authentication.getName());

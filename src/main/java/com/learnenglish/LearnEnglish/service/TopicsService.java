@@ -18,6 +18,7 @@ import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.util.UserLevelHelper;
 
 @Service
 public class TopicsService {
@@ -29,12 +30,15 @@ public class TopicsService {
     TopicMapper topicMapper;
     @Autowired
     LevelsRepository levelsRepository;
+     @Autowired
+    private UserLevelHelper userLevelHelper;
     //get topic by User
     public List<TopicsRespone> getTopics (String email)
     {
          User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-        List<TopicSummary> lst=topicsRepository.findTopicSummariesByLevel(user.getLevel());
+        Levels studyingLevel = userLevelHelper.getStudyingLevel(user);
+        List<TopicSummary> lst=topicsRepository.findTopicSummariesByLevel(studyingLevel);
         return topicMapper.toListDTO(lst);
     }
     //create 

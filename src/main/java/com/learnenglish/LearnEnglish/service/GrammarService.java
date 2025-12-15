@@ -18,6 +18,7 @@ import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.util.UserLevelHelper;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Validation;
@@ -32,13 +33,15 @@ public class GrammarService {
     GrammarMapper grammarMapper;
     @Autowired
     LevelsRepository levelsRepository;
-    
+     @Autowired
+    private UserLevelHelper userLevelHelper;
 
     public List<GrammarRespone> getGrammars(String email)
     {
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
-            List<Grammar> grammars=grammarRepository.findByLevel(user.getLevel());
+            Levels studyingLevel = userLevelHelper.getStudyingLevel(user);
+            List<Grammar> grammars=grammarRepository.findByLevel(studyingLevel);
             return grammarMapper.toListDTO(grammars);
     }
 
@@ -47,7 +50,8 @@ public class GrammarService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản với email này"));
         Grammar grammar=grammarRepository.findById(id).orElseThrow(()-> new ValidationException("Không tìm thấy grammar"));
-        if(!grammar.getLevel().getCode().equals(user.getLevel().getCode()))
+        Levels studyingLevel = userLevelHelper.getStudyingLevel(user);
+        if(!grammar.getLevel().getCode().equals(studyingLevel.getCode()))
         {
             throw new ValidationException("Grammar không thuộc trình độ này");
         }

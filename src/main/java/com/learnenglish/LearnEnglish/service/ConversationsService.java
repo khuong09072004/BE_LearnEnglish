@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.learnenglish.LearnEnglish.dto.requests.ConversationRequest;
 import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
 import com.learnenglish.LearnEnglish.entity.Conversations;
+import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
@@ -17,6 +18,7 @@ import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
 import com.learnenglish.LearnEnglish.repository.ConversationsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.util.UserLevelHelper;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -30,7 +32,8 @@ public class ConversationsService {
     TopicsRepository topicsRepository;
     @Autowired
     ConverSationMapper converSationMapper;
-
+    @Autowired
+    private UserLevelHelper userLevelHelper;
     public List<ConverSationRespone> getConversations(String email,Long topicId)
     {
         User user = userRepository.findByEmail(email)
@@ -38,7 +41,8 @@ public class ConversationsService {
        
         Topics topic = topicsRepository.findById(topicId)
                 .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
-        if(!user.getLevel().getCode().equals(topic.getLevel().getCode()))
+        Levels studyingLevel = userLevelHelper.getStudyingLevel(user);
+        if(!studyingLevel.getCode().equals(topic.getLevel().getCode()))
         {
             throw new ValidationException("Topic không phù hợp với trình độ của người học");
         }

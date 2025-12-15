@@ -28,11 +28,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new RuntimeException("User account is locked");
         }
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword() != null ? user.getPassword() : "{noop}google_user")
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
-                .accountLocked(user.getStatus() == User.Status.LOCKED)
-                .build();
+        return new CustomUserPrincipal(
+            user.getId(),
+            user.getEmail(),
+            user.getPassword(),
+            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+    );
     }
 }

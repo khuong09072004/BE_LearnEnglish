@@ -10,6 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Getter
+@Setter
 public class User_level_progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +28,5 @@ public class User_level_progress {
     @Column(name = "is_completed")
     private boolean is_completed;
     @Column(name = "completed_at")
-    private LocalDateTime completed_at;
-
-    
+    private LocalDateTime completed_at;   
 }

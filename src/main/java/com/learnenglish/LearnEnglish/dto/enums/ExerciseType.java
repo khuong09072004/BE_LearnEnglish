@@ -20,7 +20,7 @@ public enum ExerciseType {
     LISTEN_WRITE,
 
     READ_MCQ,
-    READ_SUMMARY,
+    READ_FILL,
     READ_QA,
 
     WRITE_REORDER,

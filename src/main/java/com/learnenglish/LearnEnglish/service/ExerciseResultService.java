@@ -37,6 +37,9 @@ public class ExerciseResultService {
     @Autowired
     private ExerciesResultMapper exerciesResultMapper;
 
+    @Autowired
+    private UserLevelProgressService userLevelProgressService;
+
     public ExerciseResultResponse gradeVocabExercise(
             ExerciseSubmitRequest request, String email) {
 
@@ -140,7 +143,7 @@ public class ExerciseResultService {
                 request.getAnswers(),
                 correctCount,
                 score);
-
+        userLevelProgressService.updateLevelProgress(user, exercise);
         return exerciesResultMapper.toDTO(result, score, correctCount);
     }
 

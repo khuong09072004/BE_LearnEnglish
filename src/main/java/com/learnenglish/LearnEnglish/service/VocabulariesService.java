@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.learnenglish.LearnEnglish.dto.requests.VocabularyRequest;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
+import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.entity.User_vocab_progress;
@@ -20,6 +21,7 @@ import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
 import com.learnenglish.LearnEnglish.repository.UserVocabProgressRepository;
 import com.learnenglish.LearnEnglish.repository.VocabulariesRepository;
+import com.learnenglish.LearnEnglish.util.UserLevelHelper;
 
 import jakarta.transaction.Transactional;
 
@@ -37,6 +39,8 @@ public class VocabulariesService {
         private VocabMapper vocabMapper;
         @Autowired 
         CloudinaryService cloudinaryService;
+        @Autowired
+        private UserLevelHelper userLevelHelper;
 
         // get list
         public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
@@ -46,8 +50,9 @@ public class VocabulariesService {
 
                 Topics topic = topicsRepository.findById(topicId)
                                 .orElseThrow(() -> new ValidationException("Topic không tồn tại"));
+                Levels studyingLevel = userLevelHelper.getStudyingLevel(user);
 
-                if (!topic.getLevel().getCode().equals(user.getLevel().getCode())) {
+                if (!topic.getLevel().getCode().equals(studyingLevel.getCode())) {
                         throw new AuthorizationException("Topic này không phù hợp với trình độ của bạn");
                 }
 

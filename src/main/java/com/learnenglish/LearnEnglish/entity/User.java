@@ -58,6 +58,10 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "level_id", nullable = true)
     private Levels level;
+        
+    @ManyToOne
+    @JoinColumn(name = "current_level_id")
+    private Levels currentLevel;
 
     @Column(name = "has_selected_level")
     private Boolean hasSelectedLevel;
