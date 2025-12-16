@@ -16,7 +16,9 @@ public interface UserVocabProgressRepository extends JpaRepository<User_vocab_pr
      @Query("""
                SELECT COUNT(uvp) 
                FROM User_vocab_progress uvp 
-               WHERE uvp.user.id = :userId AND uvp.vocabulary.topic.id = :topicId AND uvp.isLearned = true
+               WHERE uvp.user.id = :userId 
+               AND uvp.vocabulary.topic.id = :topicId 
+               AND uvp.isLearned = true
            """)
      int countLearnedByUserAndTopic(@Param("userId") Long userId, @Param("topicId") Long topicId);
 }

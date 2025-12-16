@@ -11,7 +11,12 @@ import com.learnenglish.LearnEnglish.entity.OtpVerification;
 
 @Repository
 public interface OtpRepository extends JpaRepository<OtpVerification, Long> {
-    @Query("SELECT COUNT(o) FROM OtpVerification o WHERE o.user.id = :userId AND o.type = :type AND o.createdAt BETWEEN :startOfDay AND :endOfDay")
+    @Query("""
+        SELECT COUNT(o) 
+        FROM OtpVerification o 
+        WHERE o.user.id = :userId AND o.type = :type 
+        AND o.createdAt BETWEEN :startOfDay AND :endOfDay
+    """)
     int countOtpSentToday(Long userId, String type, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
     Optional<OtpVerification> findFirstByUserIdAndTypeOrderByCreatedAtDesc(Long userId, String type);

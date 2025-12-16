@@ -67,6 +67,7 @@ public class ExerciseItemsService {
                 .collect(Collectors.toList());
         Map<String,Object> respones= new HashMap<>();;
         respones.put("type", exercises.getType());
+        respones.put("passageId", exercises.getPassingId());
         respones.put("title", exercises.getTitle());
         respones.put("duration",exercises.getDuration());
         respones.put("audioUrl", exercises.getAudioUrl());
