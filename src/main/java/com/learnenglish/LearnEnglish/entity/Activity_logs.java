@@ -25,5 +25,5 @@ public class Activity_logs {
     private String detail;
     
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 }

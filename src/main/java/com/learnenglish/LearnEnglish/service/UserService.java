@@ -6,14 +6,20 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.learnenglish.LearnEnglish.dto.responses.LevelProgressResponse;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.entity.User_level_progress;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
+import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
+import com.learnenglish.LearnEnglish.repository.StudyTrackingRepository;
 import com.learnenglish.LearnEnglish.repository.UserLevelProgressRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.repository.UserVocabProgressRepository;
+import com.learnenglish.LearnEnglish.repository.VocabulariesRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -28,6 +34,17 @@ public class UserService {
 
     @Autowired
     private UserLevelProgressRepository userLevelProgressRepository;
+    @Autowired
+    private VocabulariesRepository vocabulariesRepository;
+    @Autowired
+    private UserVocabProgressRepository userVocabProgressRepository;
+    @Autowired
+    private  ExercisesRepository exercisesRepository;
+    @Autowired
+    private  ExerciseResultsRepository exerciseResultsRepository;
+    @Autowired
+    private  StudyTrackingRepository studyTrackingRepository;
+
 
     @Transactional
     public void selectLevel(String levelCode, String email) {
@@ -78,6 +95,37 @@ public class UserService {
                 false,
                 null
             )
+        );
+    }
+
+    // get tracking in Level 
+     public LevelProgressResponse getLevelProgress( String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+        Long levelId = user.getCurrentLevel().getId();
+        int totalVocabulary =
+                vocabulariesRepository.countByLevel(levelId);
+
+        int learnedVocabulary =
+                userVocabProgressRepository
+                        .countLearnedVocabularyByLevel(user, levelId);
+        int totalExercises =
+                exercisesRepository.countByLevel(levelId);
+
+        int passedExercises =
+                exerciseResultsRepository
+                        .countPassedExercisesByLevel(user, levelId);
+
+        int totalStudyMinutes =
+                studyTrackingRepository.sumStudyMinutes(user);
+
+        return new LevelProgressResponse(
+                learnedVocabulary,
+                totalVocabulary,
+                passedExercises,
+                totalExercises,
+                totalStudyMinutes
         );
     }
 }

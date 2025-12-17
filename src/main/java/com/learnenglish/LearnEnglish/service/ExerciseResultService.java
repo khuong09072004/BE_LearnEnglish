@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.learnenglish.LearnEnglish.dto.enums.ActivityAction;
 import com.learnenglish.LearnEnglish.dto.requests.ExerciseSubmitRequest;
 import com.learnenglish.LearnEnglish.dto.responses.ExerciseResultResponse;
 import com.learnenglish.LearnEnglish.entity.Exercise_results;
@@ -18,6 +19,7 @@ import com.learnenglish.LearnEnglish.repository.ExerciseItemsRepository;
 import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
+import com.learnenglish.LearnEnglish.util.SaveResultOutcome;
 
 import jakarta.transaction.Transactional;
 import lombok.var;
@@ -39,6 +41,12 @@ public class ExerciseResultService {
 
     @Autowired
     private UserLevelProgressService userLevelProgressService;
+
+    @Autowired
+    private StudyTrackingService studyTrackingService;
+
+    @Autowired
+    private ActivityLogService activityLogService;
 
     public ExerciseResultResponse gradeVocabExercise(
             ExerciseSubmitRequest request, String email) {
@@ -128,24 +136,60 @@ public class ExerciseResultService {
         return buildResult(exercise, user, request, correctCount, items.size());
     }
 
-    private ExerciseResultResponse buildResult(
-            Exercises exercise,
-            User user,
-            ExerciseSubmitRequest request,
-            int correctCount,
-            int total) {
+   private ExerciseResultResponse buildResult(
+        Exercises exercise,
+        User user,
+        ExerciseSubmitRequest request,
+        int correctCount,
+        int total) {
 
-        int score = calculateScore(correctCount, total);
+    int score = calculateScore(correctCount, total);
 
-        Exercise_results result = saveOrUpdateResult(
-                exercise,
-                user,
-                request.getAnswers(),
-                correctCount,
-                score);
-        userLevelProgressService.updateLevelProgress(user, exercise);
-        return exerciesResultMapper.toDTO(result, score, correctCount);
+    SaveResultOutcome outcome = saveOrUpdateResult(
+            exercise,
+            user,
+            request.getAnswers(),
+            correctCount,
+            score
+    );
+
+
+    int seconds = request.getTimeSpentInSeconds();
+    if (seconds > 0 && seconds <= 3600) {
+        int minutes = (int) Math.ceil(seconds / 60.0);
+        studyTrackingService.addStudyMinutes(user, minutes);
     }
+
+    if (outcome.firstTime() || outcome.improved()) {
+        activityLogService.log(
+            user,
+            ActivityAction.COMPLETE_EXERCISE,
+            """
+            {
+              "exerciseId": %d,
+              "score": %d,
+              "correct": %d,
+              "type": "%s"
+            }
+            """.formatted(
+                exercise.getId(),
+                score,
+                correctCount,
+                outcome.firstTime() ? "FIRST_TIME" : "IMPROVED"
+            )
+        );
+    }
+
+ 
+    userLevelProgressService.updateLevelProgress(user, exercise);
+
+    return exerciesResultMapper.toDTO(
+        outcome.result(),
+        score,
+        correctCount
+    );
+}
+
 
     private User getUser(String email) {
         return userRepository.findByEmail(email)
@@ -214,7 +258,7 @@ public class ExerciseResultService {
         return false;
     }
 
-    private Exercise_results saveOrUpdateResult(
+        private SaveResultOutcome saveOrUpdateResult(
             Exercises exercise,
             User user,
             JsonNode answers,
@@ -225,25 +269,35 @@ public class ExerciseResultService {
                 .findByExerciseIdAndUserId(exercise.getId(), user.getId());
 
         Exercise_results result;
+        boolean firstTime = false;
+        boolean improved = false;
 
         if (oldOpt.isEmpty()) {
             result = new Exercise_results();
             result.setExercise(exercise);
             result.setUser(user);
+            firstTime = true;
         } else {
             result = oldOpt.get();
+            if (score > result.getScore()) {
+                improved = true;
+            }
         }
 
         result.setAnswers(answers);
         result.setCorrectCount(correctCount);
 
-        if (oldOpt.isEmpty() || score > result.getScore()) {
+        // chỉ update score + completedAt khi có ý nghĩa
+        if (firstTime || improved) {
             result.setScore(score);
             result.setCompletedAt(LocalDateTime.now());
         }
 
-        return resultsRepository.save(result);
-    }
+        resultsRepository.save(result);
+
+        return new SaveResultOutcome(result, firstTime, improved);
+}
+
 
     private int calculateScore(int correct, int total) {
         if (total == 0)

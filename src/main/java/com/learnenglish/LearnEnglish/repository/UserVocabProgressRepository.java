@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.entity.User_vocab_progress;
 
 @Repository
@@ -21,4 +22,13 @@ public interface UserVocabProgressRepository extends JpaRepository<User_vocab_pr
                AND uvp.isLearned = true
            """)
      int countLearnedByUserAndTopic(@Param("userId") Long userId, @Param("topicId") Long topicId);
+
+      @Query("""
+        SELECT COUNT(uvp)
+        FROM User_vocab_progress uvp
+        WHERE uvp.user = :user
+          AND uvp.isLearned = true
+          AND uvp.vocabulary.topic.level.id = :levelId
+    """)
+    int countLearnedVocabularyByLevel(User user, Long levelId);
 }

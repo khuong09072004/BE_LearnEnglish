@@ -1,5 +1,7 @@
 package com.learnenglish.LearnEnglish.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.oauth2.IdToken;
+import com.learnenglish.LearnEnglish.dto.enums.ActivityAction;
 import com.learnenglish.LearnEnglish.dto.requests.ForgotPasswordRequest;
 import com.learnenglish.LearnEnglish.dto.requests.RegisterRequest;
 import com.learnenglish.LearnEnglish.dto.requests.ResetPasswordRequest;
@@ -20,6 +23,7 @@ import com.learnenglish.LearnEnglish.dto.requests.VerifyOtpRequest;
 import com.learnenglish.LearnEnglish.entity.OtpVerification;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
+import com.learnenglish.LearnEnglish.repository.ActivityLogRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
 import com.learnenglish.LearnEnglish.util.JwtTokenProvider;
 
@@ -39,6 +43,12 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
     @Autowired
     JwtTokenProvider tokenProvider;
+    @Autowired
+    ActivityLogService activityLogService;
+
+    @Autowired
+    ActivityLogRepository activityLogRepository;
+
     public User Login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("Tài khoản không tồn tại trong hệ thống"));
@@ -48,6 +58,20 @@ public class AuthService {
             throw new ValidationException("Tài khoản của bạn đã bị khóa");
         } else if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ValidationException("Mật khẩu không chính xác");
+        }
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+        boolean alreadyLoggedToday =
+            activityLogRepository.existsByUserAndActionAndCreatedAtBetween(
+                user,
+                ActivityAction.LOGIN_DAILY.name(),
+                startOfDay,
+                endOfDay
+            );
+
+        if (!alreadyLoggedToday) {
+            activityLogService.log(user, ActivityAction.LOGIN_DAILY);
         }
         return user;
     }

@@ -7,4 +7,5 @@ import lombok.Data;
 public class ExerciseSubmitRequest {
     private Long exerciseId;
     private JsonNode answers;
+    private int timeSpentInSeconds;
 }

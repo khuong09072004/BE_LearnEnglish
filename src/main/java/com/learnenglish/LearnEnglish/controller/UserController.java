@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
@@ -47,5 +48,11 @@ public class UserController {
     {
         List<TopicsRespone> lstTopics= topicsService.getTopics(authentication.getName());
         return ApiResponse.success("success", lstTopics);
+    }
+
+    @GetMapping("/Tracking/level")
+    @Operation(summary = "Lấy tiến độ của User theo level đang làm ")
+    public ApiResponse<?> getLevelProgress(Authentication authentication) {
+        return ApiResponse.success("success", userService.getLevelProgress( authentication.getName()));
     }
 }

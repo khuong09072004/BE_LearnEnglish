@@ -50,4 +50,10 @@ List<Object[]> findWithResultRaw(Long topicId, Long userId);
 """)
 List<Object[]> findByTopicCategoryRaw(Long topicId, Exercises.ExerciseCategory category, Long userId);
 
+@Query("""
+    SELECT COUNT(e)
+    FROM Exercises e
+    WHERE e.topic.level.id = :levelId
+""")
+int countByLevel(Long levelId);
 }

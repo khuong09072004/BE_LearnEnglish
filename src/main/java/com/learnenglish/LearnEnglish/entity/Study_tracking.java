@@ -19,8 +19,8 @@ public class Study_tracking {
     private User user;
     
     @Column(name = "study_date")
-    private LocalDate study_date;
-    
+    private LocalDate studyDate;
+
     @Column(name = "minutes_spent")
-    private int minutes_spent;
+    private int minutesSpent;
 }

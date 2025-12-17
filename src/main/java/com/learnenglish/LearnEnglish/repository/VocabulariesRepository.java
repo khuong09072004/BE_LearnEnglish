@@ -25,4 +25,11 @@ public interface VocabulariesRepository extends JpaRepository<Vocabularies,Long>
             WHERE v.topic.id = :topicId
             """)
     int countByTopicId(@Param ("topicId") Long topicId);
+
+    @Query("""
+        SELECT COUNT(v)
+        FROM Vocabularies v
+        WHERE v.topic.level.id = :levelId
+    """)
+    int countByLevel(Long levelId);
 } 
