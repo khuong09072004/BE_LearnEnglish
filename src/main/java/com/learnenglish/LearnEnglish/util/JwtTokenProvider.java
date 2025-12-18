@@ -39,6 +39,14 @@ public class JwtTokenProvider {
             .compact();
 }
 
+    public Long getUserIdFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("id", Long.class);
+    }
 
     public String getEmailFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()

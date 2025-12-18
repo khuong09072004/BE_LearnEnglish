@@ -112,4 +112,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<User_level_progress> ListUser_level_progress;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Chat_messages> ListChatMessages;
 }

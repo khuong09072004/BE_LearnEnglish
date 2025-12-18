@@ -34,4 +34,7 @@ public class Topics {
 
     @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)
     private Set<Conversations> conversations;
+
+    @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)
+    private Set<Chat_messages> ListChatMessages;
 }
