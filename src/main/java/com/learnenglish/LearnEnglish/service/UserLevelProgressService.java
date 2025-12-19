@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.learnenglish.LearnEnglish.dto.enums.ActivityAction;
 import com.learnenglish.LearnEnglish.entity.Exercises;
 import com.learnenglish.LearnEnglish.entity.Levels;
 import com.learnenglish.LearnEnglish.entity.User;
@@ -26,6 +27,12 @@ public class UserLevelProgressService {
 
     @Autowired
     private LevelsRepository levelsRepository;
+
+    @Autowired
+    private ActivityLogService activityLogService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public void updateLevelProgress(User user, Exercises exercise) {
 
@@ -55,6 +62,20 @@ public class UserLevelProgressService {
         if (percent == 100 && !progress.is_completed()) {
             progress.set_completed(true);
             progress.setCompleted_at(LocalDateTime.now());
+             activityLogService.log(
+                user,
+                ActivityAction.LEVEL_UP,
+                """
+                {
+                  "level": "%s"
+                }
+                """.formatted(level.getCode())
+            );
+
+            notificationService.sendLevelCompleted(
+                user,
+                level.getCode()
+            );
             openNextLevel(user, level);
         }
 

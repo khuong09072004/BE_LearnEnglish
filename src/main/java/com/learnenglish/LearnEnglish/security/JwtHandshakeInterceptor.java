@@ -32,10 +32,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             Map<String, Object> attributes) {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             String token = servletRequest.getServletRequest().getParameter("token");
-            System.out.println("Token from query param: " + token);
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 Long userId = jwtTokenProvider.getUserIdFromJWT(token);
                 attributes.put("userId", userId);
+                attributes.put("principal", new StompPrincipal(userId.toString()));
                 return true;
             }
         }

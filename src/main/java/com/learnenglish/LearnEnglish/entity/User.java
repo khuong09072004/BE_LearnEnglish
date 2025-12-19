@@ -115,4 +115,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<Chat_messages> ListChatMessages;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Notification> ListNotifications;
 }
