@@ -52,6 +52,7 @@ public class GoogleService {
         String jwt = jwtTokenProvider.generateToken(user);
         return new LoginResponse(
             jwt,
+            user.getId(),
             user.getEmail(),
             user.getFullName(),
             user.getAvatar(),

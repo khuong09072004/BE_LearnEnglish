@@ -54,7 +54,7 @@ public class AuthController {
 
         String token = tokenProvider.generateToken(user);
 
-        return ApiResponse.success("Đăng nhập thành công", new LoginResponse(token,user.getEmail(),user.getFullName(),user.getAvatar(),user.getHasSelectedLevel()));
+        return ApiResponse.success("Đăng nhập thành công", new LoginResponse(token,user.getId(),user.getEmail(),user.getFullName(),user.getAvatar(),user.getHasSelectedLevel()));
     }
 
     

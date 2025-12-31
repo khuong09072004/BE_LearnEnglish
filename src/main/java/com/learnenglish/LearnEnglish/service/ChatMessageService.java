@@ -65,4 +65,27 @@ public class ChatMessageService {
                 ))
                 .toList();
     }
+
+        @Transactional
+        public ChatMessageResponse updateMessage(Long messageId, String newContent) {
+            Chat_messages message = chatMessageRepository.findById(messageId)
+                    .orElseThrow(() -> new RuntimeException("Message not found"));
+                message.setMessage(newContent);
+                Chat_messages updatedMessage = chatMessageRepository.save(message);
+                return new ChatMessageResponse(
+                        updatedMessage.getId(),
+                        updatedMessage.getTopic().getId(),
+                        updatedMessage.getUser().getId(),
+                        updatedMessage.getUser().getFullName(),
+                        updatedMessage.getUser().getAvatar(),
+                        updatedMessage.getMessage(),
+                        updatedMessage.getSentAt()
+                );
+        }
+        @Transactional
+        public void deleteMessage(Long messageId) {
+            Chat_messages message = chatMessageRepository.findById(messageId)
+                        .orElseThrow(() -> new RuntimeException("Message not found"));
+                chatMessageRepository.delete(message);
+        }
 }
