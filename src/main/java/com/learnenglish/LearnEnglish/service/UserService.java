@@ -136,6 +136,7 @@ public class UserService {
                 userProfile.put("avatar", user.getAvatar());
                 userProfile.put("dob", user.getDateOfBirth());
                 userProfile.put("TypeAccount", user.getGoogleId() == null ? "Normal" : "Google");
+                userProfile.put("Level", user.getLevel() != null ? user.getLevel().getCode() : "Chưa chọn cấp độ");
                 return userProfile;
         }
 
