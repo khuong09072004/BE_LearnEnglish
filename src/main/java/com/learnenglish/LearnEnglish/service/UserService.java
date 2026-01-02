@@ -33,171 +33,156 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    PasswordEncoder passwordEncoder;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private LevelsRepository levelsRepository;
+        @Autowired
+        PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserLevelProgressRepository userLevelProgressRepository;
-    @Autowired
-    private VocabulariesRepository vocabulariesRepository;
-    @Autowired
-    private UserVocabProgressRepository userVocabProgressRepository;
-    @Autowired
-    private  ExercisesRepository exercisesRepository;
-    @Autowired
-    private  ExerciseResultsRepository exerciseResultsRepository;
-    @Autowired
-    private  StudyTrackingRepository studyTrackingRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
+        @Autowired
+        private LevelsRepository levelsRepository;
 
-    @Transactional
-    public void selectLevel(String levelCode, String email) {
+        @Autowired
+        private UserLevelProgressRepository userLevelProgressRepository;
+        @Autowired
+        private VocabulariesRepository vocabulariesRepository;
+        @Autowired
+        private UserVocabProgressRepository userVocabProgressRepository;
+        @Autowired
+        private ExercisesRepository exercisesRepository;
+        @Autowired
+        private ExerciseResultsRepository exerciseResultsRepository;
+        @Autowired
+        private StudyTrackingRepository studyTrackingRepository;
+        @Autowired
+        private CloudinaryService cloudinaryService;
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new ValidationException("Không tìm thấy tài khoản"));
+        @Transactional
+        public void selectLevel(String levelCode, String email) {
 
-        if (Boolean.TRUE.equals(user.getHasSelectedLevel())) {
-            throw new ValidationException("User đã chọn level rồi");
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ValidationException("Không tìm thấy tài khoản"));
+
+                if (Boolean.TRUE.equals(user.getHasSelectedLevel())) {
+                        throw new ValidationException("User đã chọn level rồi");
+                }
+
+                Levels selectedLevel = levelsRepository.findByCode(levelCode)
+                                .orElseThrow(() -> new ValidationException("Level không hợp lệ"));
+
+                // set level hiện tại
+                user.setLevel(selectedLevel);
+                user.setCurrentLevel(selectedLevel);
+                user.setHasSelectedLevel(true);
+                userRepository.save(user);
+
+                // các level nhỏ hơn → completed
+                List<Levels> lowerLevels = levelsRepository.findByLevelOrderLessThan(
+                                selectedLevel.getLevelOrder());
+
+                for (Levels l : lowerLevels) {
+                        userLevelProgressRepository.save(
+                                        new User_level_progress(
+                                                        null,
+                                                        user,
+                                                        l,
+                                                        0,
+                                                        true,
+                                                        LocalDateTime.now()));
+                }
+
+                // level hiện tại → chưa completed
+                userLevelProgressRepository.save(
+                                new User_level_progress(
+                                                null,
+                                                user,
+                                                selectedLevel,
+                                                0,
+                                                false,
+                                                null));
         }
 
-        Levels selectedLevel = levelsRepository.findByCode(levelCode)
-                .orElseThrow(() ->
-                        new ValidationException("Level không hợp lệ"));
+        // get tracking in Level
+        public LevelProgressResponse getLevelProgress(String email) {
 
-        // set level hiện tại
-        user.setLevel(selectedLevel);
-        user.setCurrentLevel(selectedLevel);
-        user.setHasSelectedLevel(true);
-        userRepository.save(user);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+                Long levelId = user.getCurrentLevel().getId();
+                int totalVocabulary = vocabulariesRepository.countByLevel(levelId);
 
-        //  các level nhỏ hơn → completed
-        List<Levels> lowerLevels =
-                levelsRepository.findByLevelOrderLessThan(
-                        selectedLevel.getLevelOrder());
+                int learnedVocabulary = userVocabProgressRepository
+                                .countLearnedVocabularyByLevel(user, levelId);
+                int totalExercises = exercisesRepository.countByLevel(levelId);
 
-        for (Levels l : lowerLevels) {
-            userLevelProgressRepository.save(
-                new User_level_progress(
-                    null,
-                    user,
-                    l,
-                    0,
-                    true,
-                    LocalDateTime.now()
-                )
-            );
+                int passedExercises = exerciseResultsRepository
+                                .countPassedExercisesByLevel(user, levelId);
+
+                int totalStudyMinutes = studyTrackingRepository.sumStudyMinutes(user);
+
+                return new LevelProgressResponse(
+                                learnedVocabulary,
+                                totalVocabulary,
+                                passedExercises,
+                                totalExercises,
+                                totalStudyMinutes);
         }
 
-        //  level hiện tại → chưa completed
-        userLevelProgressRepository.save(
-            new User_level_progress(
-                null,
-                user,
-                selectedLevel,
-                0,
-                false,
-                null
-            )
-        );
-    }
-
-    // get tracking in Level 
-     public LevelProgressResponse getLevelProgress( String email) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
-        Long levelId = user.getCurrentLevel().getId();
-        int totalVocabulary =
-                vocabulariesRepository.countByLevel(levelId);
-
-        int learnedVocabulary =
-                userVocabProgressRepository
-                        .countLearnedVocabularyByLevel(user, levelId);
-        int totalExercises =
-                exercisesRepository.countByLevel(levelId);
-
-        int passedExercises =
-                exerciseResultsRepository
-                        .countPassedExercisesByLevel(user, levelId);
-
-        int totalStudyMinutes =
-                studyTrackingRepository.sumStudyMinutes(user);
-
-        return new LevelProgressResponse(
-                learnedVocabulary,
-                totalVocabulary,
-                passedExercises,
-                totalExercises,
-                totalStudyMinutes
-        );
-    }
-
-     public Object getProfile(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ValidationException("User không tồn tại"));
-        Map<String, Object> userProfile = new HashMap<>();
-        userProfile.put("name", user.getFullName());
-        userProfile.put("email", user.getEmail());
-        userProfile.put("avatar", user.getAvatar());
-        userProfile.put("dob", user.getDateOfBirth());
-        return userProfile;
-     }
-
-public String updateAvatar(String email, MultipartFile avatar) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ValidationException("User không tồn tại"));
-
-        String avatarUrl = cloudinaryService.uploadImage(avatar);
-        if (avatarUrl == null) {
-                throw new ValidationException("Cập nhật avatar thất bại");
+        public Object getProfile(String email) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ValidationException("User không tồn tại"));
+                Map<String, Object> userProfile = new HashMap<>();
+                userProfile.put("name", user.getFullName());
+                userProfile.put("email", user.getEmail());
+                userProfile.put("avatar", user.getAvatar());
+                userProfile.put("dob", user.getDateOfBirth());
+                userProfile.put("TypeAccount", user.getGoogleId() == null ? "Normal" : "Google");
+                return userProfile;
         }
 
-        user.setAvatar(avatarUrl);
-        userRepository.save(user);
+        public String updateAvatar(String email, MultipartFile avatar) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ValidationException("User không tồn tại"));
 
-        return avatarUrl;
+                String avatarUrl = cloudinaryService.uploadImage(avatar);
+                if (avatarUrl == null) {
+                        throw new ValidationException("Cập nhật avatar thất bại");
+                }
+
+                user.setAvatar(avatarUrl);
+                userRepository.save(user);
+
+                return avatarUrl;
         }
 
-public Object updateProfile(String name, UpdateProfileRequest request) {
-        User user = userRepository.findByEmail(name)
-                .orElseThrow(() -> new ValidationException("User không tồn tại"));
-        if (request.getFullName() != null) {
-                user.setFullName(request.getFullName());
+        public Object updateProfile(String name, UpdateProfileRequest request) {
+                User user = userRepository.findByEmail(name)
+                                .orElseThrow(() -> new ValidationException("User không tồn tại"));
+                if (request.getFullName() != null) {
+                        user.setFullName(request.getFullName());
+                }
+
+                if (request.getDateOfBirth() != null) {
+                        user.setDateOfBirth(request.getDateOfBirth());
+                }
+
+                userRepository.save(user);
+                Map<String, Object> userProfile = new HashMap<>();
+                userProfile.put("name", user.getFullName());
+                userProfile.put("email", user.getEmail());
+                userProfile.put("avatar", user.getAvatar());
+                userProfile.put("dob", user.getDateOfBirth());
+                return userProfile;
         }
 
-        if (request.getDateOfBirth() != null) {
-                user.setDateOfBirth(request.getDateOfBirth());
-        }
+        public void changePassword(String email, UpdatePasswordRequest request) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ValidationException("User không tồn tại"));
 
-        
-        userRepository.save(user);
-        Map<String, Object> userProfile = new HashMap<>();
-        userProfile.put("name", user.getFullName());
-        userProfile.put("email", user.getEmail());
-        userProfile.put("avatar", user.getAvatar());
-        userProfile.put("dob", user.getDateOfBirth());
-        return userProfile;
+                if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                        throw new ValidationException("Mật khẩu cũ không đúng");
+                }
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+        }
 }
-
-public void changePassword(String email, UpdatePasswordRequest request) {
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ValidationException("User không tồn tại"));
-
-    if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-        throw new ValidationException("Mật khẩu cũ không đúng");
-    }
-
-    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-    userRepository.save(user);
-}
-}
-
-

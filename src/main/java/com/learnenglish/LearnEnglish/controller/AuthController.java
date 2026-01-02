@@ -53,8 +53,7 @@ public class AuthController {
         User user = authService.Login(request.getEmail(), request.getPassword());
 
         String token = tokenProvider.generateToken(user);
-
-        return ApiResponse.success("Đăng nhập thành công", new LoginResponse(token,user.getId(),user.getEmail(),user.getFullName(),user.getAvatar(),user.getHasSelectedLevel()));
+        return ApiResponse.success("Đăng nhập thành công", new LoginResponse(token,user.getId(),user.getEmail(),user.getFullName(),user.getAvatar(),user.getGoogleId() == null ? "Normal" : "Google",user.getHasSelectedLevel()));
     }
 
     

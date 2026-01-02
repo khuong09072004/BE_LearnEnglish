@@ -47,7 +47,7 @@ public class GoogleService {
                     u.setStatus(User.Status.ACTIVE);
                     return userRepository.save(u);
                 });
-
+        String typeAccount = user.getGoogleId() == null ? "Normal" : "Google";
         boolean hasSelectedLevel = user.getLevel() != null;
         String jwt = jwtTokenProvider.generateToken(user);
         return new LoginResponse(
@@ -56,6 +56,7 @@ public class GoogleService {
             user.getEmail(),
             user.getFullName(),
             user.getAvatar(),
+            typeAccount,
             hasSelectedLevel);
     }
 
