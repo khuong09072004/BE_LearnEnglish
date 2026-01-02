@@ -3,6 +3,7 @@ package com.learnenglish.LearnEnglish.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,9 +11,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
 import com.learnenglish.LearnEnglish.dto.requests.SelectLevelRequest;
+import com.learnenglish.LearnEnglish.dto.requests.UpdatePasswordRequest;
+import com.learnenglish.LearnEnglish.dto.requests.UpdateProfileRequest;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.entity.Topics;
 import com.learnenglish.LearnEnglish.service.TopicsService;
@@ -54,5 +58,41 @@ public class UserController {
     @Operation(summary = "Lấy tiến độ của User theo level đang làm ")
     public ApiResponse<?> getLevelProgress(Authentication authentication) {
         return ApiResponse.success("success", userService.getLevelProgress( authentication.getName()));
+    }
+
+    @GetMapping("/Profile")
+    @Operation(summary = "Lấy thông tin người dùng")
+    public ApiResponse<?> getProfile(Authentication authentication) {
+        return ApiResponse.success("success", userService.getProfile(authentication.getName()));
+    }
+    
+    @PutMapping("/profile")
+     @Operation(summary = "Cập nhật thông tin người dùng")
+    public ApiResponse<?> updateProfile(
+            Authentication authentication,
+            @RequestBody UpdateProfileRequest request) {
+
+        Object response=userService.updateProfile(authentication.getName(), request);
+        return ApiResponse.success("Cập nhật thông tin thành công", response);
+    }
+
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Cập nhật avatar người dùng")
+    public ApiResponse<?> updateAvatar(
+            Authentication authentication,
+            @RequestParam("avatar") MultipartFile avatarFile) {
+
+        String avatarUrl = userService.updateAvatar(authentication.getName(), avatarFile);
+        return ApiResponse.success("Cập nhật avatar thành công", avatarUrl);
+    }
+    
+    @PutMapping("/password")
+    @Operation(summary = "Cập nhật mật khẩu người dùng")
+    public ApiResponse<?> updatePassword(
+            Authentication authentication,
+            @RequestBody UpdatePasswordRequest request) {
+
+        userService.changePassword(authentication.getName(), request);
+        return ApiResponse.success("Cập nhật mật khẩu thành công", null);
     }
 }
