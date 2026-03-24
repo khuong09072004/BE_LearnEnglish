@@ -7,10 +7,12 @@ import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.learnenglish.LearnEnglish.dto.requests.UserStatusRequest;
 import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
 import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
+import com.learnenglish.LearnEnglish.dto.responses.UserResponse;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
 import com.learnenglish.LearnEnglish.entity.Exercises;
 import com.learnenglish.LearnEnglish.entity.Grammar;
@@ -25,6 +27,7 @@ import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
 import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.mapper.TopicMapper;
+import com.learnenglish.LearnEnglish.mapper.UserMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
@@ -62,6 +65,9 @@ public class AdminService {
     ExerciesMapper exerciesMapper;
     @Autowired
     ExercisesRepository exercisesRepository;
+
+     @Autowired
+    private UserMapper userMapper;
     // get list vocabularies
     public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 
@@ -151,5 +157,38 @@ public class AdminService {
     public List<ExercisesRespone> getAllExercises() {
         List<Exercises> responses = exercisesRepository.findAll();
         return exerciesMapper.toListDTO(responses);  
+    }
+
+  
+   
+
+    // --- QUẢN LÝ USER CHO ADMIN ---
+
+    // 1. Lấy danh sách tất cả Users
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toListDTO(users);
+    }
+
+    // 2. Lấy chi tiết 1 User
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy người dùng này"));
+        return userMapper.toDTO(user);
+    }
+    public UserResponse updateUserStatus(Long id, UserStatusRequest req) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("Không tìm thấy người dùng này"));
+
+        if (req.getStatus() != null) {
+            try {
+                user.setStatus(User.Status.valueOf(req.getStatus().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new ValidationException("Trạng thái không hợp lệ. Chỉ chấp nhận ACTIVE hoặc LOCKED");
+            }
+        }
+
+        User savedUser = userRepository.save(user);
+        return userMapper.toDTO(savedUser);
     }
 }
