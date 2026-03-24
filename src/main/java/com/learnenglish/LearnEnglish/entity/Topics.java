@@ -33,8 +33,5 @@ public class Topics {
     private Set<Exercises> exercises;
 
     @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)
-    private Set<Conversations> conversations;
-
-    @OneToMany(mappedBy="topic", cascade = CascadeType.ALL)
     private Set<Chat_messages> ListChatMessages;
 }

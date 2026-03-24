@@ -2,11 +2,7 @@ package com.learnenglish.LearnEnglish.config;
 
 import com.learnenglish.LearnEnglish.security.JwtAuthenticationEntryPoint;
 import com.learnenglish.LearnEnglish.security.JwtAuthenticationFilter;
-import com.learnenglish.LearnEnglish.security.OAuth2AuthenticationSuccessHandler;
 
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +23,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

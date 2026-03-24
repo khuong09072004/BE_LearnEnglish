@@ -12,7 +12,6 @@ import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
 import com.learnenglish.LearnEnglish.dto.responses.TopicsRespone;
 import com.learnenglish.LearnEnglish.dto.responses.VocaBularyRespone;
-import com.learnenglish.LearnEnglish.entity.Conversations;
 import com.learnenglish.LearnEnglish.entity.Exercises;
 import com.learnenglish.LearnEnglish.entity.Grammar;
 import com.learnenglish.LearnEnglish.entity.Levels;
@@ -23,12 +22,10 @@ import com.learnenglish.LearnEnglish.entity.Vocabularies;
 import com.learnenglish.LearnEnglish.entity.imp.TopicSummary;
 import com.learnenglish.LearnEnglish.exception.AuthorizationException;
 import com.learnenglish.LearnEnglish.exception.ValidationException;
-import com.learnenglish.LearnEnglish.mapper.ConverSationMapper;
 import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
 import com.learnenglish.LearnEnglish.mapper.GrammarMapper;
 import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
-import com.learnenglish.LearnEnglish.repository.ConversationsRepository;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
@@ -60,10 +57,6 @@ public class AdminService {
     @Autowired
     TopicMapper topicMapper;
 
-    @Autowired
-    ConversationsRepository conversationsRepository;
-    @Autowired
-    ConverSationMapper converSationMapper;
 
     @Autowired
     ExerciesMapper exerciesMapper;
@@ -123,13 +116,7 @@ public class AdminService {
     }
 
     //getlist conversation
-    public List<ConverSationRespone> getConversations(Long topicId)
-    {
-        Topics topic = topicsRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Không tìm thấy Topics "));
-        List<Conversations> conversations=conversationsRepository.findByTopic(topic.getId());
-        return converSationMapper.toListDTO(conversations);
-    }
+   
 
     //Exercies
     public List<ExercisesRespone> getExercies(Long topicId)

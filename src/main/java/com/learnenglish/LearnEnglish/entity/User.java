@@ -95,8 +95,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Exercise_results> ListExcerciseResults;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Conversation_scores> ListConversation_scores;
+
 
     @OneToMany(mappedBy = "user")
     private Set<Study_tracking> ListStudy_tracking;
