@@ -27,7 +27,9 @@ public class VocabularyAdminController {
 
     @GetMapping
     public ApiResponse<?> getVocabularies(Authentication authentication, @RequestParam(required = false) Long topicId) {
+         System.out.println(authentication.getName());
         if (topicId != null) {
+           
             return ApiResponse.success("Danh sách từ vựng theo chủ đề", adminService.getVocabularies(authentication.getName(), topicId));
         }
         return ApiResponse.success("Danh sách tất cả từ vựng", adminService.getAllVocabularies()); 

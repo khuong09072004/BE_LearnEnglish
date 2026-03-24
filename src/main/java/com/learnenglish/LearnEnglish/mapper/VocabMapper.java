@@ -19,27 +19,31 @@ public class VocabMapper {
 
     public VocaBularyRespone toDTO(Vocabularies vocab, boolean isLearned) {
         return new VocaBularyRespone(
-            vocab.getId(),
-            vocab.getTopic().getId(),
-            vocab.getWord(),
-            vocab.getMeaning(),
-            vocab.getPhonetic(),
-            vocab.getDescription(),
-            vocab.getImage_url(),
-            isLearned
-        );
+                vocab.getId(),
+                vocab.getTopic().getId(),
+                vocab.getWord(),
+                vocab.getMeaning(),
+                vocab.getPhonetic(),
+                vocab.getDescription(),
+                vocab.getImage_url(),
+                isLearned);
     }
 
     public List<VocaBularyRespone> toListDTO(List<Vocabularies> lst, User user) {
-                List<VocaBularyRespone> respones = new ArrayList<>();
-                for (Vocabularies item : lst) {
-                        boolean is_learned = userVocabProgressRepository
-                                        .findByUserIdAndVocabularyId(user.getId(), item.getId())
-                                        .map(User_vocab_progress::isLearned)
-                                        .orElse(false);
-                        VocaBularyRespone dto = toDTO(item, is_learned);
-                        respones.add(dto);
-                }
-                return respones;
+        List<VocaBularyRespone> respones = new ArrayList<>();
+        for (Vocabularies item : lst) {
+            boolean is_learned = false;
+
+            if (user != null) {
+                is_learned = userVocabProgressRepository
+                        .findByUserIdAndVocabularyId(user.getId(), item.getId())
+                        .map(User_vocab_progress::isLearned)
+                        .orElse(false);
+            }
+
+            VocaBularyRespone dto = toDTO(item, is_learned);
+            respones.add(dto);
+        }
+        return respones;
     }
 }
