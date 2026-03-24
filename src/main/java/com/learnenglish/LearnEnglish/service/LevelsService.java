@@ -26,6 +26,11 @@ public class LevelsService {
     @Autowired
     UserRepository userRepository;
 
+    public List<LevelRespone> getAllLevels() {
+        List<Levels> lst = levelsRepository.findAll();
+        return levelmaper.toListDTO(lst);
+    }
+
     public LevelRespone getLevelByid(Long id) {
         Levels level = levelsRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Level không tồn tại"));

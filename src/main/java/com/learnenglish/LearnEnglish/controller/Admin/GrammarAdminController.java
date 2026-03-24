@@ -26,9 +26,11 @@ public class GrammarAdminController {
     private AdminService adminService;
 
     @GetMapping
-    public ApiResponse<?> getGrammars(Authentication authentication, @RequestParam Long levelId) {
-        Object response = adminService.getGrammars(authentication.getName(), levelId);
-        return ApiResponse.success("Danh sách ngữ pháp", response);
+    public ApiResponse<?> getGrammars(Authentication authentication, @RequestParam(required = false) Long levelId) {
+        if (levelId != null) {
+            return ApiResponse.success("Danh sách ngữ pháp theo level", adminService.getGrammars(authentication.getName(), levelId));
+        }
+        return ApiResponse.success("Danh sách tất cả ngữ pháp", adminService.getAllGrammars());
     }
 
     @GetMapping("/{id}")

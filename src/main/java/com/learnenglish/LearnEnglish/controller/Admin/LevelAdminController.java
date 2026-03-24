@@ -18,6 +18,11 @@ public class LevelAdminController {
     @Autowired
     private LevelsService levelsService;
 
+    @GetMapping
+    public ApiResponse<?> getAllLevels() {
+        return ApiResponse.success("Danh sách tất cả levels", levelsService.getAllLevels());
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<?> getLevelById(@PathVariable Long id) {
         return ApiResponse.success("Chi tiết level", levelsService.getLevelByid(id));

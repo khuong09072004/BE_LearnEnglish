@@ -22,9 +22,12 @@ public class TopicAdminController {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping
-    public ApiResponse<?> getTopics(@RequestParam Long levelId) {
-        return ApiResponse.success("Danh sách topics", adminService.getTopics(levelId));
+   @GetMapping
+    public ApiResponse<?> getTopics(@RequestParam(required = false) Long levelId) {
+        if (levelId != null) {
+            return ApiResponse.success("Danh sách topics theo level", adminService.getTopics(levelId));
+        }
+        return ApiResponse.success("Danh sách tất cả topics", adminService.getAllTopics()); 
     }
 
     @GetMapping("/{id}")

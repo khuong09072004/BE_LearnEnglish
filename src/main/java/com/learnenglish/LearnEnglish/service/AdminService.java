@@ -127,4 +127,29 @@ public class AdminService {
         List<Exercises> respones=exercisesRepository.findByTopic(topic);
         return exerciesMapper.toListDTO(respones);  
     }
+
+    
+    // Lấy TOÀN BỘ từ vựng trong hệ thống (Không phân biệt topic)
+    public List<VocaBularyRespone> getAllVocabularies() {
+        List<Vocabularies> lst = vocabulariesRepository.findAll();
+        return vocabMapper.toListDTO(lst, null); 
+    }
+
+    // Lấy TOÀN BỘ ngữ pháp trong hệ thống
+    public List<GrammarRespone> getAllGrammars() {
+        List<Grammar> grammars = grammarRepository.findAll();
+        return grammarMapper.toListDTO(grammars);
+    }
+
+    // Lấy TOÀN BỘ chủ đề trong hệ thống
+    public List<TopicsRespone> getAllTopics() {
+        List<TopicSummary> lst = topicsRepository.findAllTopicSummaries(); 
+        return topicMapper.toListDTO(lst);
+    }
+
+    // Lấy TOÀN BỘ bài tập trong hệ thống
+    public List<ExercisesRespone> getAllExercises() {
+        List<Exercises> responses = exercisesRepository.findAll();
+        return exerciesMapper.toListDTO(responses);  
+    }
 }

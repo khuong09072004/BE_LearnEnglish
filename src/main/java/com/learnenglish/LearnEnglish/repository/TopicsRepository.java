@@ -32,5 +32,13 @@ public interface TopicsRepository extends JpaRepository<Topics,Long> {
         GROUP BY t.id
     """)
     TopicSummary findTopicSummaryById(@Param("id") Long id);
+
+    @Query("""
+        SELECT t.id AS id, t.name AS name, t.level.code AS level, COUNT(v) AS totalVocab
+        FROM Topics t
+        LEFT JOIN t.vocabularies v
+        GROUP BY t.id
+    """)
+    List<TopicSummary> findAllTopicSummaries();
    
 }

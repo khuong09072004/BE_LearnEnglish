@@ -24,9 +24,12 @@ public class ExerciseAdminController {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping
-    public ApiResponse<?> getExercises(@RequestParam Long topicId) {
-        return ApiResponse.success("Danh sách exercises", adminService.getExercies(topicId));
+   @GetMapping
+    public ApiResponse<?> getExercises(@RequestParam(required = false) Long topicId) {
+        if (topicId != null) {
+            return ApiResponse.success("Danh sách bài tập theo chủ đề", adminService.getExercies(topicId));
+        }
+        return ApiResponse.success("Danh sách tất cả bài tập", adminService.getAllExercises());
     }
 
     @GetMapping("/{id}")
