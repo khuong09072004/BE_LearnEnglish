@@ -72,9 +72,10 @@ public class TopicsService {
     public TopicsRespone deleteTopics(Long id)
     {
         Topics topic=topicsRepository.findById(id)
-                .orElseThrow(()->new ValidationException("Topic không tồn tại"));;
-        topicsRepository.delete(topic);
+                .orElseThrow(()->new ValidationException("Topic không tồn tại"));
         TopicSummary summary = topicsRepository.findTopicSummaryById(topic.getId());
+        topicsRepository.delete(topic);
+        
         return topicMapper.toDTO(summary);
     }
 }

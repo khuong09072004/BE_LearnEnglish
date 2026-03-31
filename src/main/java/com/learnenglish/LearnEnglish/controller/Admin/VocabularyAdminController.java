@@ -1,4 +1,5 @@
 package com.learnenglish.LearnEnglish.controller.Admin;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -27,12 +28,13 @@ public class VocabularyAdminController {
 
     @GetMapping
     public ApiResponse<?> getVocabularies(Authentication authentication, @RequestParam(required = false) Long topicId) {
-         System.out.println(authentication.getName());
+        System.out.println(authentication.getName());
         if (topicId != null) {
-           
-            return ApiResponse.success("Danh sách từ vựng theo chủ đề", adminService.getVocabularies(authentication.getName(), topicId));
+
+            return ApiResponse.success("Danh sách từ vựng theo chủ đề",
+                    adminService.getVocabularies(authentication.getName(), topicId));
         }
-        return ApiResponse.success("Danh sách tất cả từ vựng", adminService.getAllVocabularies()); 
+        return ApiResponse.success("Danh sách tất cả từ vựng", adminService.getAllVocabularies());
     }
 
     @GetMapping("/{id}")
@@ -42,16 +44,42 @@ public class VocabularyAdminController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<?> createVocab(@ModelAttribute VocabularyRequest req, 
-                                     @RequestParam(required = false) MultipartFile imageFile) {
+    public ApiResponse<?> createVocab(
+            @RequestParam("topicId") Long topicId,
+            @RequestParam("word") String word,
+            @RequestParam("meaning") String meaning,
+            @RequestParam("phonetic") String phonetic,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+
+        VocabularyRequest req = new VocabularyRequest();
+        req.setTopicId(topicId);
+        req.setWord(word);
+        req.setMeaning(meaning);
+        req.setPhonetic(phonetic);
+        req.setDescription(description);
+
         Object response = vocabulariesService.createVocabularyByAdmin(req, imageFile);
         return ApiResponse.success("Thêm từ vựng thành công", response);
     }
 
     @PutMapping(value = "/{vocabId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<?> updateVocab(@PathVariable Long vocabId, 
-                                     @ModelAttribute VocabularyRequest req,
-                                     @RequestParam(required = false) MultipartFile imageFile) {
+    public ApiResponse<?> updateVocab(
+            @PathVariable Long vocabId,
+            @RequestParam("topicId") Long topicId,
+            @RequestParam("word") String word,
+            @RequestParam("meaning") String meaning,
+            @RequestParam("phonetic") String phonetic,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+
+        VocabularyRequest req = new VocabularyRequest();
+        req.setTopicId(topicId);
+        req.setWord(word);
+        req.setMeaning(meaning);
+        req.setPhonetic(phonetic);
+        req.setDescription(description);
+
         Object response = vocabulariesService.updateVocabularyByAdmin(vocabId, req, imageFile);
         return ApiResponse.success("Cập nhật từ vựng thành công", response);
     }
