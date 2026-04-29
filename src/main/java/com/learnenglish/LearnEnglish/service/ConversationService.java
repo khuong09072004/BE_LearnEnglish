@@ -22,6 +22,8 @@ import com.learnenglish.LearnEnglish.entity.ConversationTurn;
 import com.learnenglish.LearnEnglish.entity.User;
 import com.learnenglish.LearnEnglish.mapper.ConversationTurnMapper;
 import com.learnenglish.LearnEnglish.repository.ConversationLessonRepository;
+import com.learnenglish.LearnEnglish.dto.responses.ConversationLessonResponse;
+import com.learnenglish.LearnEnglish.mapper.ConversationLessonMapper;
 import com.learnenglish.LearnEnglish.repository.ConversationSessionRepository;
 import com.learnenglish.LearnEnglish.repository.ConversationStepAttemptRepository;
 import com.learnenglish.LearnEnglish.repository.ConversationStepRepository;
@@ -202,6 +204,23 @@ public class ConversationService {
     public ConversationSession getSession(Long sessionId) {
         return sessionRepo.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
+    }
+
+    public ConversationLessonResponse getLesson(Long lessonId) {
+        ConversationLesson lesson = lessonRepo.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+        java.util.List<ConversationStep> steps = stepRepo.findByLessonIdOrderByStepOrder(lessonId);
+        return ConversationLessonMapper.toDto(lesson, steps);
+    }
+
+    public java.util.List<ConversationLessonResponse> getAllLessons() {
+        java.util.List<ConversationLesson> lessons = lessonRepo.findAll();
+        java.util.List<ConversationLessonResponse> resp = new java.util.ArrayList<>();
+        for (ConversationLesson lesson : lessons) {
+            java.util.List<ConversationStep> steps = stepRepo.findByLessonIdOrderByStepOrder(lesson.getId());
+            resp.add(ConversationLessonMapper.toDto(lesson, steps));
+        }
+        return resp;
     }
 
     private String cleanAiJson(String raw) {

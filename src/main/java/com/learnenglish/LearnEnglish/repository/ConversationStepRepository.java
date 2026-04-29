@@ -11,4 +11,5 @@ public interface ConversationStepRepository extends JpaRepository<ConversationSt
     Optional<ConversationStep> findByLessonIdAndStepOrder(Long lessonId, int stepOrder);
 
     boolean existsByLessonIdAndStepOrder(Long lessonId, int stepOrder);
+    java.util.List<ConversationStep> findByLessonIdOrderByStepOrder(Long lessonId);
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +40,16 @@ public class ConversationChatController {
             @PathVariable Long sessionId,
             @RequestBody String message) {
         return ApiResponse.success("AI Response", conversationService.reply(sessionId, message));
+    }
+
+    @GetMapping("/lessons/{lessonId}")
+    public ApiResponse<?> getLesson(@PathVariable Long lessonId) {
+        return ApiResponse.success("Lesson detail", conversationService.getLesson(lessonId));
+    }
+
+    @GetMapping("/lessons")
+    public ApiResponse<?> getAllLessons() {
+        return ApiResponse.success("All lessons", conversationService.getAllLessons());
     }
 
 }
