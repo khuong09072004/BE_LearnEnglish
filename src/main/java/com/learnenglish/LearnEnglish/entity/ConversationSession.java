@@ -30,6 +30,9 @@ public class ConversationSession {
     @Column(name = "is_completed")
     private Boolean isCompleted;
 
+    @Column(name = "is_learn")
+    private Boolean learned;
+
     @Column(name = "total_score")
     private Integer totalScore;
 

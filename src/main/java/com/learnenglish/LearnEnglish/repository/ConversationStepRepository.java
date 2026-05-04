@@ -1,5 +1,6 @@
 package com.learnenglish.LearnEnglish.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,5 @@ public interface ConversationStepRepository extends JpaRepository<ConversationSt
     Optional<ConversationStep> findByLessonIdAndStepOrder(Long lessonId, int stepOrder);
 
     boolean existsByLessonIdAndStepOrder(Long lessonId, int stepOrder);
-    java.util.List<ConversationStep> findByLessonIdOrderByStepOrder(Long lessonId);
+    List<ConversationStep> findByLessonIdOrderByStepOrder(Long lessonId);
 }

@@ -9,4 +9,6 @@ import com.learnenglish.LearnEnglish.entity.ConversationTurn;
 @Repository
 public interface ConversationTurnRepository extends JpaRepository<ConversationTurn, Long> {
     List<ConversationTurn> findTop10BySessionIdOrderByCreatedAtAsc(Long sessionId);
+    List<ConversationTurn> findBySessionIdOrderByCreatedAtAsc(Long sessionId);
+    void deleteBySessionId(Long sessionId);
 }

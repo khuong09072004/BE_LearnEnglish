@@ -1,11 +1,6 @@
 package com.learnenglish.LearnEnglish.controller;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,9 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learnenglish.LearnEnglish.dto.ApiResponse;
-import com.learnenglish.LearnEnglish.entity.ConversationTurn;
 import com.learnenglish.LearnEnglish.service.ConversationService;
 
 
@@ -43,13 +36,42 @@ public class ConversationChatController {
     }
 
     @GetMapping("/lessons/{lessonId}")
-    public ApiResponse<?> getLesson(@PathVariable Long lessonId) {
-        return ApiResponse.success("Lesson detail", conversationService.getLesson(lessonId));
+    public ApiResponse<?> getLesson(
+            @PathVariable Long lessonId,
+            @RequestParam(required = false) Long userId) {
+        if (userId == null) {
+            return ApiResponse.success("Lesson detail", conversationService.getLesson(lessonId));
+        }
+        return ApiResponse.success("Lesson detail with learning status", conversationService.getLessonForUser(lessonId, userId));
     }
 
     @GetMapping("/lessons")
-    public ApiResponse<?> getAllLessons() {
-        return ApiResponse.success("All lessons", conversationService.getAllLessons());
+    public ApiResponse<?> getAllLessons(@RequestParam Long userId) {
+        return ApiResponse.success("All lessons with learning status", conversationService.getAllLessonsForUser(userId));
+    }
+
+    @GetMapping("/sessions/{sessionId}")
+    public ApiResponse<?> getSessionDetail(@PathVariable Long sessionId) {
+        return ApiResponse.success("Session detail", conversationService.getSessionDetail(sessionId));
+    }
+
+    @GetMapping("/sessions/{sessionId}/turns")
+    public ApiResponse<?> getSessionTurns(@PathVariable Long sessionId) {
+        return ApiResponse.success("Session turns", conversationService.getSessionTurns(sessionId));
+    }
+
+    @GetMapping("/users/{userId}/sessions")
+    public ApiResponse<?> getUserSessions(@PathVariable Long userId) {
+        return ApiResponse.success("User sessions", conversationService.getSessionsByUser(userId));
+    }
+
+    @GetMapping("/lessons/{lessonId}/history")
+    public ApiResponse<?> getLearnedHistory(
+            @PathVariable Long lessonId,
+            @RequestParam Long userId) {
+        return ApiResponse.success(
+                "Learned conversation history",
+                conversationService.getLearnedHistoryByLesson(lessonId, userId));
     }
 
 }

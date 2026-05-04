@@ -9,4 +9,6 @@ import com.learnenglish.LearnEnglish.entity.ConversationStepAttempt;
 @Repository
 public interface ConversationStepAttemptRepository extends JpaRepository<ConversationStepAttempt, Long> {
     Optional<ConversationStepAttempt> findBySessionIdAndStepId(Long sessionId, Long stepId);
+    void deleteBySessionId(Long sessionId);
+    void deleteByStepId(Long stepId);
 }
