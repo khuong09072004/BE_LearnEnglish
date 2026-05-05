@@ -129,6 +129,10 @@ public class ExercisesService {
 
   
     private ExerciseType parseType(String type) {
+        if (type == null || type.isBlank()) {
+            throw new ValidationException("Type không được để trống");
+        }
+
         try {
             return ExerciseType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -155,15 +159,21 @@ public class ExercisesService {
     }
 
     private void handleAudioUpload(Exercises exercise, ExerciseType typeEnum, MultipartFile audioFile) {
-        if (isAudioExercise(typeEnum)) {
-
-            if (audioFile != null && !audioFile.isEmpty()) {
-                String audioUrl = cloudinaryService.uploadAudio(audioFile);
-                exercise.setAudioUrl(audioUrl);
-            } else {
+        if (exercise.getCategory() == Exercises.ExerciseCategory.LISTENING) {
+            if (audioFile == null || audioFile.isEmpty()) {
                 throw new ValidationException("Bài nghe yêu cầu upload audio");
             }
 
+            String audioUrl = cloudinaryService.uploadAudio(audioFile);
+            exercise.setAudioUrl(audioUrl);
+            return;
+        }
+
+        if (isAudioExercise(typeEnum)) {
+            if (audioFile != null && !audioFile.isEmpty()) {
+                String audioUrl = cloudinaryService.uploadAudio(audioFile);
+                exercise.setAudioUrl(audioUrl);
+            }
         } else {
             exercise.setAudioUrl(null);
         }
