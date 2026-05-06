@@ -17,6 +17,7 @@ import com.learnenglish.LearnEnglish.exception.ValidationException;
 import com.learnenglish.LearnEnglish.mapper.ExerciesMapper;
 import com.learnenglish.LearnEnglish.repository.ExerciseResultsRepository;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
+import com.learnenglish.LearnEnglish.repository.PassagesRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
 import com.learnenglish.LearnEnglish.repository.UserRepository;
 import com.learnenglish.LearnEnglish.util.UserLevelHelper;
@@ -42,6 +43,9 @@ public class ExercisesService {
     private CloudinaryService cloudinaryService;
     @Autowired
     private UserLevelHelper userLevelHelper;
+
+    @Autowired
+    private PassagesRepository passagesRepository;
    
     public List<ExercisesRespone> getExercies(String email, Long topicId) {
         User user = userRepository.findByEmail(email)
@@ -86,6 +90,7 @@ public class ExercisesService {
         ExerciseType typeEnum = parseType(req.getType());
 
         Exercises exercise = buildExercise(req, typeEnum);
+        applyPassageRule(exercise, typeEnum, req.getPassingId());
         handleAudioUpload(exercise, typeEnum, audioFile);
 
         exercisesRepository.save(exercise);
@@ -110,6 +115,8 @@ public class ExercisesService {
         if (req.getCategory() != null) {
             exercise.setCategory(Exercises.ExerciseCategory.valueOf(req.getCategory().toUpperCase()));
         }
+
+        applyPassageRule(exercise, typeEnum, req.getPassingId());
 
         handleAudioUpload(exercise, typeEnum, audioFile);
 
@@ -189,6 +196,35 @@ public class ExercisesService {
             default:
                 return false;
         }
+    }
+
+    private boolean isReadingExercise(ExerciseType type) {
+        switch (type) {
+            case READ_MCQ:
+            case READ_FILL:
+            case READ_QA:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void applyPassageRule(Exercises exercise, ExerciseType type, Integer passingId) {
+        boolean isReading = isReadingExercise(type) || exercise.getCategory() == Exercises.ExerciseCategory.READING;
+
+        if (!isReading) {
+            // Non-reading exercises do not require passage link.
+            exercise.setPassingId(null);
+            return;
+        }
+
+        if (passingId == null) {
+            throw new ValidationException("Bài Reading bắt buộc phải chọn passageId");
+        }
+
+        passagesRepository.findById(Long.valueOf(passingId))
+                .orElseThrow(() -> new ValidationException("Passage không tồn tại: " + passingId));
+        exercise.setPassingId(passingId);
     }
 
   

@@ -44,6 +44,7 @@ public class ExerciseAdminController {
             @RequestParam String type,
             @RequestParam int duration,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer passingId,
             @RequestParam(value = "audioFile", required = false) MultipartFile audioFile
     ) throws Exception {
         ExercisesRequest req = new ExercisesRequest();
@@ -52,6 +53,7 @@ public class ExerciseAdminController {
         req.setType(type);
         req.setDuration(duration);
         req.setCategory(category);
+        req.setPassingId(passingId);
 
         return ApiResponse.success("Tạo bài tập thành công", exercisesService.createExercise(req, audioFile));
     }
@@ -70,6 +72,7 @@ public class ExerciseAdminController {
             @RequestParam String type,
             @RequestParam int duration,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer passingId,
             @RequestParam(value = "audioFile", required = false) MultipartFile audioFile
     ) throws Exception {
         ExercisesRequest req = new ExercisesRequest();
@@ -78,6 +81,7 @@ public class ExerciseAdminController {
         req.setType(type);
         req.setDuration(duration);
         req.setCategory(category);
+        req.setPassingId(passingId);
 
         return ApiResponse.success("Cập nhật bài tập thành công", exercisesService.updateExercise(id, req, audioFile));
     }

@@ -11,7 +11,7 @@ import com.learnenglish.LearnEnglish.entity.Exercises;
 @Component
 public class ExerciesMapper {
      public ExercisesRespone toDTO(Exercises item) {
-        return new ExercisesRespone(
+        ExercisesRespone dto = new ExercisesRespone(
             item.getId(),
             item.getTopic().getId(),
             item.getTitle(),
@@ -20,6 +20,8 @@ public class ExerciesMapper {
             item.getDuration(),
             item.getCategory() != null ? item.getCategory().name() : null 
         );
+        dto.setPassedId(item.getPassingId());
+        return dto;
     }
 
 

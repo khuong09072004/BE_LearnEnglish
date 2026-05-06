@@ -8,4 +8,5 @@ public class ExercisesRequest {
     private String type;       
     private int duration;
     private String category;
+    private Integer passingId;
 }
