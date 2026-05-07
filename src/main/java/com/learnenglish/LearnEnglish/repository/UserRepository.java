@@ -16,20 +16,20 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
-    @Query("""
+        @Query("""
             SELECT u
             FROM User u
             WHERE u.status = 'ACTIVE'
             AND NOT EXISTS (
-                SELECT 1
-                FROM Activity_logs a
-                WHERE a.user = u
-                AND a.action IN :actions
-                AND a.createdAt >= :since
+            SELECT 1
+            FROM Activity_logs a
+            WHERE a.user = u
+            AND a.action IN :actions
+            AND a.createdAt >= :since
             )
             """)
-    List<User> findUsersNotStudySince(
-            @Param("actions") List<ActivityAction> actions,
+        List<User> findUsersNotStudySince(
+            @Param("actions") List<String> actions,
             @Param("since") LocalDateTime since);
 
 }

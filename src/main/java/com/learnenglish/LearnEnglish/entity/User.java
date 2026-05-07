@@ -100,8 +100,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Study_tracking> ListStudy_tracking;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Reports> ListReports;
+    // TODO: Reports entity not used, table 'reports' doesn't exist in DB yet
+    // @OneToMany(mappedBy = "user")
+    // private Set<Reports> ListReports;
 
     @OneToMany(mappedBy = "user")
     private Set<Activity_logs> ListActivity_logs;

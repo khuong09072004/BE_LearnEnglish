@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.learnenglish.LearnEnglish.entity.Vocabularies;
+import com.learnenglish.LearnEnglish.entity.Topics;
 
 @Repository
 public interface VocabulariesRepository extends JpaRepository<Vocabularies,Long> {
@@ -32,4 +33,12 @@ public interface VocabulariesRepository extends JpaRepository<Vocabularies,Long>
         WHERE v.topic.level.id = :levelId
     """)
     int countByLevel(Long levelId);
+
+    @Query("""
+        SELECT DISTINCT t
+        FROM Topics t
+        WHERE t.level.id = :levelId
+        ORDER BY t.id
+    """)
+    List<Topics> findAllTopicsByLevel(@Param("levelId") Long levelId);
 } 

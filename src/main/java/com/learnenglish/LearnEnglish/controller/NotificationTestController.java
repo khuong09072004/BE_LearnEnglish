@@ -19,6 +19,8 @@ public class NotificationTestController {
     private  NotificationService notificationService;
     @Autowired
     private  UserRepository userRepository;
+    @Autowired
+    private com.learnenglish.LearnEnglish.scheduler.StudyReminderScheduler studyReminderScheduler;
 
     // Test STUDY REMINDER
     @PostMapping("/study-reminder/{userId}")
@@ -56,5 +58,13 @@ public class NotificationTestController {
             """
         );
         return "OK - SYSTEM sent";
+    }
+
+    // Run the reminder job immediately (for testing). You can set property
+    // `app.study.reminder.seconds` to a small value (e.g. 10) to test threshold.
+    @PostMapping("/run-reminder")
+    public String runReminderNow() {
+        studyReminderScheduler.runReminderJob();
+        return "OK - reminder job executed";
     }
 }
