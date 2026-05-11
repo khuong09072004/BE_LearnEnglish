@@ -1,5 +1,6 @@
 package com.learnenglish.LearnEnglish.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.learnenglish.LearnEnglish.dto.requests.UserStatusRequest;
+import com.learnenglish.LearnEnglish.dto.responses.AdminDashboardResponse;
 import com.learnenglish.LearnEnglish.dto.responses.ConverSationRespone;
 import com.learnenglish.LearnEnglish.dto.responses.ExercisesRespone;
 import com.learnenglish.LearnEnglish.dto.responses.GrammarRespone;
@@ -30,6 +32,8 @@ import com.learnenglish.LearnEnglish.mapper.TopicMapper;
 import com.learnenglish.LearnEnglish.mapper.UserMapper;
 import com.learnenglish.LearnEnglish.mapper.VocabMapper;
 import com.learnenglish.LearnEnglish.repository.ExercisesRepository;
+import com.learnenglish.LearnEnglish.repository.ConversationLessonRepository;
+import com.learnenglish.LearnEnglish.repository.ConversationSessionRepository;
 import com.learnenglish.LearnEnglish.repository.GrammarRepository;
 import com.learnenglish.LearnEnglish.repository.LevelsRepository;
 import com.learnenglish.LearnEnglish.repository.TopicsRepository;
@@ -68,6 +72,35 @@ public class AdminService {
 
      @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ConversationLessonRepository conversationLessonRepository;
+    @Autowired
+    private ConversationSessionRepository conversationSessionRepository;
+
+    public AdminDashboardResponse getDashboardOverview() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<UserResponse> recentUsers = userMapper.toListDTO(
+            userRepository.findByCreatedAtAfterOrderByCreatedAtDesc(sevenDaysAgo));
+
+        return AdminDashboardResponse.builder()
+                .totalUsers(userRepository.count())
+                .activeUsers(userRepository.countByStatus(User.Status.ACTIVE))
+                .lockedUsers(userRepository.countByStatus(User.Status.LOCKED))
+                .pendingUsers(userRepository.countByStatus(User.Status.PENDING))
+                .adminUsers(userRepository.countByRole(User.Role.ADMIN))
+                .totalLevels(levelsRepository.count())
+                .totalTopics(topicsRepository.count())
+                .totalGrammar(grammarRepository.count())
+                .totalVocabularies(vocabulariesRepository.count())
+                .totalExercises(exercisesRepository.count())
+                .totalConversationLessons(conversationLessonRepository.count())
+                .totalConversationSessions(conversationSessionRepository.count())
+                .completedConversationSessions(conversationSessionRepository.countByIsCompletedTrue())
+                .learnedConversationSessions(conversationSessionRepository.countByLearnedTrue())
+                .recentRegisteredUsersCount(recentUsers.size())
+                .recentRegisteredUsers(recentUsers)
+                .build();
+    }
     // get list vocabularies
     public List<VocaBularyRespone> getVocabularies(String email, Long topicId) {
 

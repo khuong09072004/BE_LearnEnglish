@@ -12,6 +12,8 @@ public interface ConversationSessionRepository extends JpaRepository<Conversatio
 	List<ConversationSession> findByUserIdOrderByStartedAtDesc(Long userId);
 	List<ConversationSession> findByLessonIdOrderByStartedAtDesc(Long lessonId);
 	List<ConversationSession> findAllByOrderByStartedAtDesc();
+	long countByIsCompletedTrue();
+	long countByLearnedTrue();
 	java.util.Optional<ConversationSession> findTopByUserIdAndLessonIdAndLearnedTrueOrderByFinishedAtDesc(Long userId, Long lessonId);
 	boolean existsByUserIdAndLessonIdAndLearnedTrue(Long userId, Long lessonId);
 }

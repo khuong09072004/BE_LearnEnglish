@@ -16,6 +16,12 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    long countByStatus(User.Status status);
+
+    long countByRole(User.Role role);
+
+    List<User> findByCreatedAtAfterOrderByCreatedAtDesc(LocalDateTime createdAt);
+
         @Query("""
             SELECT u
             FROM User u
