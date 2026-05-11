@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class GeminiService {
+public class OpenAiService {
 
     @Value("${openai.api.url}")
     private String apiUrl;

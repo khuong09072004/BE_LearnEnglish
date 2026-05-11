@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -27,6 +28,7 @@ import com.learnenglish.LearnEnglish.entity.ConversationStep;
 import com.learnenglish.LearnEnglish.entity.ConversationStepAttempt;
 import com.learnenglish.LearnEnglish.entity.ConversationTurn;
 import com.learnenglish.LearnEnglish.entity.User;
+import com.learnenglish.LearnEnglish.exception.AppException;
 import com.learnenglish.LearnEnglish.mapper.ConversationTurnMapper;
 import com.learnenglish.LearnEnglish.dto.responses.ConversationSessionResponse;
 import com.learnenglish.LearnEnglish.repository.ConversationLessonRepository;
@@ -46,7 +48,7 @@ public class ConversationService {
     @Autowired private ConversationStepRepository stepRepo;
     @Autowired private ConversationTurnRepository turnRepo;
     @Autowired private ConversationStepAttemptRepository stepAttemptRepo;
-    @Autowired private GeminiService geminiService;
+    @Autowired private OpenAiService openAiService;
     @Autowired private ConversationPromptBuilder promptBuilder;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepo;
@@ -102,7 +104,7 @@ public class ConversationService {
         int n = (count == null || count <= 0) ? 3 : count;
         String prompt = buildStepSuggestionPrompt(lesson, n);
 
-        String aiRaw = geminiService.askAI(prompt);
+        String aiRaw = openAiService.askAI(prompt);
         String raw = aiRaw;
         try {
             String jsonOnly = cleanAiJson(aiRaw);
@@ -118,9 +120,14 @@ public class ConversationService {
         StringBuilder sb = new StringBuilder();
         sb.append("Generate ").append(count).append(" JSON steps for a conversation lesson. ");
         sb.append("Return a JSON array where each element has fields: stepOrder (int), aiRole (string), userTask (string), grammarFocus (string), sampleAnswer (string), maxAttempts (int).\\n");
-        sb.append("Use the lesson data to make realistic tasks. Lesson title: \"").append(lesson.getTitle()).append("\". ");
-        sb.append("Goal: \"").append(lesson.getGoal() != null ? lesson.getGoal() : "").append("\". ");
+        sb.append("Use the lesson content as the main source of truth.\\n");
+        sb.append("Lesson title: \"").append(lesson.getTitle() != null ? lesson.getTitle() : "").append("\".\\n");
+        sb.append("Lesson description: \"").append(lesson.getDescription() != null ? lesson.getDescription() : "").append("\".\\n");
+        sb.append("Lesson goal: \"").append(lesson.getGoal() != null ? lesson.getGoal() : "").append("\".\\n");
+        sb.append("Lesson system prompt: \"").append(lesson.getSystemPrompt() != null ? lesson.getSystemPrompt() : "").append("\".\\n");
         sb.append("Skill focus: \"").append(lesson.getSkillFocus() != null ? lesson.getSkillFocus().name() : "SPEAKING").append("\".\\n");
+        sb.append("Create steps that follow the lesson system prompt, match the title and goal, and feel like a natural progression from step 1 to step ").append(count).append(".\\n");
+        sb.append("Each step should build on the previous one instead of being random or repetitive.\\n");
         sb.append("Make answers concise and appropriate for the level. Number the steps starting at 1.\\n");
         sb.append("Example output:\\n[\\n  {\\\"stepOrder\\\":1,\\\"aiRole\\\":\\\"Barista\\\",\\\"userTask\\\":\\\"Greet the customer\\\",\\\"grammarFocus\\\":\\\"Greetings\\\",\\\"sampleAnswer\\\":\\\"Hello, what can I get for you?\\\",\\\"maxAttempts\\\":3},\\n  {\\\"stepOrder\\\":2,...}\\n]\\n");
         return sb.toString();
@@ -135,7 +142,11 @@ public class ConversationService {
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
             if (session.getIsCompleted()) {
-                throw new RuntimeException("Conversation already completed");
+                throw new AppException(
+                    "conversation_completed",
+                    "Conversation already completed",
+                    HttpStatus.CONFLICT
+                );
             }
 
             ConversationStep step = stepRepo
@@ -183,7 +194,7 @@ public class ConversationService {
 
         for (int i = 0; i < maxRetries; i++) {
             try {
-                String aiRaw = geminiService.askAI(prompt);
+                String aiRaw = openAiService.askAI(prompt);
                 System.out.println("AI RAW RESPONSE (Attempt " + (i + 1) + "): \n" + aiRaw);
                 String jsonOnly = cleanAiJson(aiRaw);
                 eval = objectMapper.readValue(jsonOnly, AiEvaluation.class);
