@@ -27,6 +27,14 @@ public class ExerciseItemsController {
         return ApiResponse.success("Tạo câu hỏi thành công", item);
     }
 
+    @PostMapping("/bulk")
+    public ApiResponse<List<ExerciseItemResponse>> createBulk(
+            @RequestBody List<ExerciseItemRequest> reqs
+    ) {
+        List<ExerciseItemResponse> items = service.createBulk(reqs);
+        return ApiResponse.success("Tạo nhiều câu hỏi thành công", items);
+    }
+
     
     @GetMapping("/{id}")
     public ApiResponse<ExerciseItemResponse> getById(
