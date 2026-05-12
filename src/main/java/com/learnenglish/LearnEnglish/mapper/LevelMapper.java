@@ -11,7 +11,7 @@ import com.learnenglish.LearnEnglish.entity.Levels;
 @Component
 public class LevelMapper {
     public LevelRespone toDTO(Levels item) {
-        return new LevelRespone(item.getId(), item.getCode(), item.getName(), item.getCreated_at());
+        return new LevelRespone(item.getId(), item.getCode(), item.getName(), item.getLevelOrder(), item.getCreated_at());
     }
 
     public List<LevelRespone> toListDTO(List<Levels> lst)

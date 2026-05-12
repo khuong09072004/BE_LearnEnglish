@@ -101,22 +101,30 @@ public class ConversationService {
         ConversationLesson lesson = lessonRepo.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
+        List<ConversationStep> existingSteps = stepRepo.findByLessonIdOrderByStepOrder(lessonId);
+        int nextStepOrder = getNextStepOrder(existingSteps);
+
         int n = (count == null || count <= 0) ? 3 : count;
-        String prompt = buildStepSuggestionPrompt(lesson, n);
+        String prompt = buildStepSuggestionPrompt(lesson, existingSteps, nextStepOrder, n);
 
         String aiRaw = openAiService.askAI(prompt);
         String raw = aiRaw;
         try {
             String jsonOnly = cleanAiJson(aiRaw);
             ConversationStepRequest[] arr = objectMapper.readValue(jsonOnly, ConversationStepRequest[].class);
-            java.util.List<ConversationStepRequest> suggestions = java.util.Arrays.asList(arr);
+            java.util.List<ConversationStepRequest> suggestions = new java.util.ArrayList<>();
+            for (int i = 0; i < arr.length && i < n; i++) {
+                ConversationStepRequest suggestion = arr[i];
+                suggestion.setStepOrder(nextStepOrder + i);
+                suggestions.add(suggestion);
+            }
             return java.util.Map.of("suggestions", suggestions, "raw", raw);
         } catch (Exception e) {
             return java.util.Map.of("suggestions", java.util.List.of(), "raw", raw, "error", e.getMessage());
         }
     }
 
-    private String buildStepSuggestionPrompt(ConversationLesson lesson, int count) {
+    private String buildStepSuggestionPrompt(ConversationLesson lesson, List<ConversationStep> existingSteps, int nextStepOrder, int count) {
         StringBuilder sb = new StringBuilder();
         sb.append("Generate ").append(count).append(" JSON steps for a conversation lesson. ");
         sb.append("Return a JSON array where each element has fields: stepOrder (int), aiRole (string), userTask (string), grammarFocus (string), sampleAnswer (string), maxAttempts (int).\\n");
@@ -126,9 +134,22 @@ public class ConversationService {
         sb.append("Lesson goal: \"").append(lesson.getGoal() != null ? lesson.getGoal() : "").append("\".\\n");
         sb.append("Lesson system prompt: \"").append(lesson.getSystemPrompt() != null ? lesson.getSystemPrompt() : "").append("\".\\n");
         sb.append("Skill focus: \"").append(lesson.getSkillFocus() != null ? lesson.getSkillFocus().name() : "SPEAKING").append("\".\\n");
-        sb.append("Create steps that follow the lesson system prompt, match the title and goal, and feel like a natural progression from step 1 to step ").append(count).append(".\\n");
+        sb.append("Existing steps in this lesson (do NOT reuse these stepOrder values):\\n");
+        if (existingSteps.isEmpty()) {
+            sb.append("- None\\n");
+        } else {
+            for (ConversationStep step : existingSteps) {
+                sb.append("- stepOrder=").append(step.getStepOrder())
+                        .append(", aiRole=").append(step.getAiRole() != null ? step.getAiRole() : "")
+                        .append(", userTask=").append(step.getUserTask() != null ? step.getUserTask() : "")
+                        .append("\\n");
+            }
+        }
+        sb.append("New steps must continue from stepOrder ").append(nextStepOrder)
+                .append(" and increase sequentially without reusing any existing order.\\n");
+        sb.append("Create steps that follow the lesson system prompt, match the title and goal, and feel like a natural progression from the last existing step.\\n");
         sb.append("Each step should build on the previous one instead of being random or repetitive.\\n");
-        sb.append("Make answers concise and appropriate for the level. Number the steps starting at 1.\\n");
+        sb.append("Make answers concise and appropriate for the level.\\n");
         sb.append("Example output:\\n[\\n  {\\\"stepOrder\\\":1,\\\"aiRole\\\":\\\"Barista\\\",\\\"userTask\\\":\\\"Greet the customer\\\",\\\"grammarFocus\\\":\\\"Greetings\\\",\\\"sampleAnswer\\\":\\\"Hello, what can I get for you?\\\",\\\"maxAttempts\\\":3},\\n  {\\\"stepOrder\\\":2,...}\\n]\\n");
         return sb.toString();
     }
@@ -345,35 +366,31 @@ public class ConversationService {
 
         Integer requestedOrder = request.getStepOrder();
         if (requestedOrder == null || requestedOrder < 1) {
-            requestedOrder = stepRepo.findByLessonIdOrderByStepOrder(lessonId).size() + 1;
+            requestedOrder = getNextStepOrder(stepRepo.findByLessonIdOrderByStepOrder(lessonId));
         }
 
-        // Tạo step với stepOrder tạm thời (giá trị âm để tránh collision)
-        ConversationStep step = ConversationStep.builder()
+        List<ConversationStep> existingSteps = stepRepo.findByLessonIdOrderByStepOrder(lessonId);
+        for (int i = existingSteps.size() - 1; i >= 0; i--) {
+            ConversationStep existingStep = existingSteps.get(i);
+            Integer currentOrder = existingStep.getStepOrder();
+            if (currentOrder != null && currentOrder >= requestedOrder) {
+                existingStep.setStepOrder(currentOrder + 1);
+                stepRepo.saveAndFlush(existingStep);
+            }
+        }
+
+        ConversationStep saved = stepRepo.saveAndFlush(ConversationStep.builder()
                 .lesson(lesson)
-                .stepOrder(-1)
+                .stepOrder(requestedOrder)
                 .aiRole(request.getAiRole())
                 .userTask(request.getUserTask())
                 .grammarFocus(request.getGrammarFocus())
                 .sampleAnswer(request.getSampleAnswer())
                 .maxAttempts(request.getMaxAttempts() != null && request.getMaxAttempts() > 0 ? request.getMaxAttempts() : 3)
                 .createdAt(request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now())
-                .build();
+                .build());
 
-        ConversationStep saved = stepRepo.save(step);
-        
-        // Set stepOrder tạm thời dùng negative stepId, rồi set giá trị mong muốn
-        saved.setStepOrder(-(int) (saved.getId() % Integer.MAX_VALUE));
-        stepRepo.save(saved);
-        
-        // Set stepOrder mong muốn rồi normalize
-        saved.setStepOrder(requestedOrder);
-        stepRepo.save(saved);
-        normalizeStepOrders(lessonId);
-        
-        ConversationStep normalized = stepRepo.findById(saved.getId())
-                .orElseThrow(() -> new RuntimeException("Step not found"));
-        return toStepResponse(normalized);
+        return toStepResponse(saved);
     }
 
     @Transactional
@@ -381,14 +398,6 @@ public class ConversationService {
     public ConversationStepResponse updateStep(Long lessonId, Long stepId, ConversationStepRequest request) {
         ConversationStep step = getStepInLesson(lessonId, stepId);
 
-        // Đổi stepOrder thành giá trị tạm thời (negative stepId) để tránh unique constraint collision
-        step.setStepOrder(-(int) (stepId % Integer.MAX_VALUE));
-        stepRepo.save(step);
-
-        // Giờ set giá trị thực từ request
-        if (request.getStepOrder() != null && request.getStepOrder() > 0) {
-            step.setStepOrder(request.getStepOrder());
-        }
         if (request.getAiRole() != null) {
             step.setAiRole(request.getAiRole());
         }
@@ -408,11 +417,34 @@ public class ConversationService {
             step.setCreatedAt(request.getCreatedAt());
         }
 
-        ConversationStep saved = stepRepo.save(step);
-        normalizeStepOrders(lessonId);
-        ConversationStep normalized = stepRepo.findById(saved.getId())
-                .orElseThrow(() -> new RuntimeException("Step not found"));
-        return toStepResponse(normalized);
+        Integer currentOrder = step.getStepOrder();
+        Integer requestedOrder = request.getStepOrder();
+
+        if (requestedOrder != null && requestedOrder > 0 && !requestedOrder.equals(currentOrder)) {
+            ConversationStep targetStep = stepRepo.findByLessonIdAndStepOrder(lessonId, requestedOrder)
+                    .orElse(null);
+
+            if (targetStep != null && !targetStep.getId().equals(stepId)) {
+                int stepTempOrder = -(int) (stepId % Integer.MAX_VALUE);
+                int targetTempOrder = -(int) (targetStep.getId() % Integer.MAX_VALUE);
+
+                step.setStepOrder(stepTempOrder);
+                targetStep.setStepOrder(targetTempOrder);
+                stepRepo.saveAndFlush(step);
+                stepRepo.saveAndFlush(targetStep);
+
+                targetStep.setStepOrder(currentOrder);
+                step.setStepOrder(requestedOrder);
+                stepRepo.saveAndFlush(targetStep);
+                ConversationStep saved = stepRepo.saveAndFlush(step);
+                return toStepResponse(saved);
+            }
+
+            step.setStepOrder(requestedOrder);
+        }
+
+        ConversationStep saved = stepRepo.saveAndFlush(step);
+        return toStepResponse(saved);
     }
 
     @Transactional
@@ -429,11 +461,16 @@ public class ConversationService {
         ConversationLesson lesson = lessonRepo.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
+        int nextOrder = getNextStepOrder(stepRepo.findByLessonIdOrderByStepOrder(lessonId));
         List<ConversationStep> steps = new ArrayList<>();
         for (ConversationStepRequest req : requests) {
+            Integer stepOrder = req.getStepOrder();
+            if (stepOrder == null || stepOrder < 1) {
+                stepOrder = nextOrder++;
+            }
             ConversationStep step = ConversationStep.builder()
                     .lesson(lesson)
-                    .stepOrder(req.getStepOrder())
+                    .stepOrder(stepOrder)
                     .aiRole(req.getAiRole())
                     .userTask(req.getUserTask())
                     .grammarFocus(req.getGrammarFocus())
@@ -598,6 +635,14 @@ public class ConversationService {
             step.setStepOrder(order++);
         }
         stepRepo.saveAll(steps);
+    }
+
+    private int getNextStepOrder(List<ConversationStep> steps) {
+        return steps.stream()
+                .map(ConversationStep::getStepOrder)
+                .filter(java.util.Objects::nonNull)
+                .max(Integer::compareTo)
+                .orElse(0) + 1;
     }
 
     private ConversationStepResponse toStepResponse(ConversationStep step) {

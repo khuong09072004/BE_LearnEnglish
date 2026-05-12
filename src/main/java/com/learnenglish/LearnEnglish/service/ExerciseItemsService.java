@@ -41,13 +41,23 @@ public class ExerciseItemsService {
         Exercises exercise = exercisesRepo.findById(req.getExerciseId())
                 .orElseThrow(() -> new ValidationException("Exercise không tồn tại"));
 
+        int requestedPosition = req.getPosition();
+        List<ExerciseItems> existingItems = itemsRepo.findByExerciseIdOrderByPosition(exercise.getId());
+        for (int i = existingItems.size() - 1; i >= 0; i--) {
+            ExerciseItems existingItem = existingItems.get(i);
+            if (existingItem.getPosition() >= requestedPosition) {
+                existingItem.setPosition(existingItem.getPosition() + 1);
+                itemsRepo.saveAndFlush(existingItem);
+            }
+        }
+
         ExerciseItems item = new ExerciseItems();
         item.setExercise(exercise);
-        item.setPosition(req.getPosition());
+        item.setPosition(requestedPosition);
         item.setQuestionJson(req.getQuestion());
         item.setAnswerJson(req.getAnswer());
 
-        itemsRepo.save(item);
+        itemsRepo.saveAndFlush(item);
 
         return mapper.toDTO(item, true); 
     }
@@ -124,11 +134,45 @@ public class ExerciseItemsService {
         ExerciseItems item = itemsRepo.findById(id)
                 .orElseThrow(() -> new ValidationException("Item không tồn tại"));
 
-        item.setPosition(req.getPosition());
+        int currentPosition = item.getPosition();
+        int requestedPosition = req.getPosition();
+
         item.setQuestionJson(req.getQuestion());
         item.setAnswerJson(req.getAnswer());
 
-        itemsRepo.save(item);
+        if (requestedPosition > 0 && requestedPosition != currentPosition) {
+            ExerciseItems targetItem = itemsRepo.findByExerciseIdOrderByPosition(item.getExercise().getId())
+                    .stream()
+                    .filter(existing -> existing.getPosition() == requestedPosition && !existing.getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+
+            if (targetItem != null) {
+                int tempPosition = -((int) (id % Integer.MAX_VALUE)) - 1;
+                item.setPosition(tempPosition);
+                itemsRepo.saveAndFlush(item);
+
+                targetItem.setPosition(currentPosition);
+                itemsRepo.saveAndFlush(targetItem);
+
+                item.setPosition(requestedPosition);
+            } else {
+                List<ExerciseItems> itemsToShift = itemsRepo.findByExerciseIdOrderByPosition(item.getExercise().getId())
+                        .stream()
+                        .filter(existing -> existing.getPosition() >= requestedPosition && !existing.getId().equals(id))
+                        .sorted(java.util.Comparator.comparingInt(ExerciseItems::getPosition).reversed())
+                        .toList();
+
+                for (ExerciseItems existingItem : itemsToShift) {
+                    existingItem.setPosition(existingItem.getPosition() + 1);
+                    itemsRepo.saveAndFlush(existingItem);
+                }
+
+                item.setPosition(requestedPosition);
+            }
+        }
+
+        itemsRepo.saveAndFlush(item);
 
         return mapper.toDTO(item, true); 
     }

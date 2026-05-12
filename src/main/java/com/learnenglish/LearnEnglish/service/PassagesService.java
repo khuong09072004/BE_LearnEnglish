@@ -24,7 +24,7 @@ public class PassagesService {
         Passages p = new Passages();
         p.setTitle(title);
         p.setContent(content);
-        if (categoryStr != null) {
+        if (categoryStr != null && !categoryStr.isBlank()) {
             try {
                 p.setCategory(Passages.Category.valueOf(categoryStr.toUpperCase()));
             } catch (IllegalArgumentException e) {
@@ -45,12 +45,14 @@ public class PassagesService {
             p.setTitle(title);
         if (content != null)
             p.setContent(content);
-        if (categoryStr != null) {
+        if (categoryStr != null && !categoryStr.isBlank()) {
             try {
                 p.setCategory(Passages.Category.valueOf(categoryStr.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Category không hợp lệ: " + categoryStr);
             }
+        } else {
+            p.setCategory(Passages.Category.READING);
         }
 
         return passagesRepository.save(p);

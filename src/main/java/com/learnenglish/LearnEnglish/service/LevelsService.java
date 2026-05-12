@@ -2,6 +2,7 @@ package com.learnenglish.LearnEnglish.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -43,9 +44,29 @@ public class LevelsService {
     }
 
     public LevelRespone createLevel(LevelRequest request) {
+        levelsRepository.findByCode(request.getCode())
+                .ifPresent(l -> {
+                    throw new ValidationException("Code level đã tồn tại");
+                });
+
+        Integer levelOrder = request.getLevelOrder();
+        if (levelOrder == null) {
+            levelOrder = levelsRepository.findAll().stream()
+                    .map(Levels::getLevelOrder)
+                    .filter(Objects::nonNull)
+                    .max(Integer::compareTo)
+                    .orElse(0) + 1;
+        }
+
+        levelsRepository.findByLevelOrder(levelOrder)
+                .ifPresent(l -> {
+                    throw new ValidationException("levelOrder đã tồn tại");
+                });
+
         Levels level = new Levels();
         level.setCode(request.getCode());
         level.setName(request.getName());
+        level.setLevelOrder(levelOrder);
         level.setCreated_at(LocalDateTime.now());
         levelsRepository.save(level);
         return levelmaper.toDTO(level);
@@ -54,8 +75,25 @@ public class LevelsService {
     public LevelRespone updateLevelByid(Long id, LevelRequest request) {
         Levels level = levelsRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Level không tồn tại"));
+
+        Integer levelOrder = request.getLevelOrder() != null
+                ? request.getLevelOrder()
+                : level.getLevelOrder();
+
+        levelsRepository.findByCode(request.getCode())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(l -> {
+                    throw new ValidationException("Code level đã tồn tại");
+                });
+        levelsRepository.findByLevelOrder(levelOrder)
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(l -> {
+                    throw new ValidationException("levelOrder đã tồn tại");
+                });
+
         level.setCode(request.getCode());
         level.setName(request.getName());
+        level.setLevelOrder(levelOrder);
         level.setCreated_at(LocalDateTime.now());
         levelsRepository.save(level);
         return levelmaper.toDTO(level);
